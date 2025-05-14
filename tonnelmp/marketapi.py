@@ -1,7 +1,7 @@
 import json
 import urllib.parse
 from curl_cffi import requests
-from wtf import generate_wtf
+from tonnelmp.wtf import generate_wtf
 from datetime import datetime, timezone, timedelta
 
 def getGifts(

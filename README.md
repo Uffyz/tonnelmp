@@ -8,10 +8,29 @@ This is a simple module that will help you interacting with Tonnel Marketplace A
 pip install tonnelmp
 ```
 
-## Where to get Auth Data
+## [IMPORTANT] Where to get Auth Data
 
-You can do it pretty simply. Go to [market.tonnel.network](https://market.tonnel.network/), login to your account, then open browser console (ctrl + shift + c on windows)
-navigate to Application tab -> Storage -> Local Storage -> https://market.tonnel.network/ -> web-initData -> copy the value next to it
+**Most of the functions require your tonnel authentication data, so please don't skip this section of documentation.**
+
+You can get it pretty easily. Go to [market.tonnel.network](https://market.tonnel.network/), login to your account, then open browser console (ctrl + shift + c on windows)
+
+Then navigate to Application tab -> Storage -> Local Storage -> https://market.tonnel.network/ -> web-initData -> copy the value next to it **entirely**
+
+## Change log
+
+#### Version 1.0.3
+
+- Fixed `wtf` module not importing correctly
+
+#### Version 1.0.4
+
+- Improved `buyGift()` function. Now you can pass `receiver: int` arg to send the gift to someone else by telegram user id. Also added `anonymously: bool, showPrice: bool` args. Defaults for both - `False`.
+- Added `returnGift()` function.
+- Added `withdraw()` function.
+- Added `mintGift()` function.
+- Added `placeBid()` function.
+- Added `switchTransfer()` function.
+- Updated documentation
 
 ## Some returns examples:
 
@@ -21,6 +40,8 @@ navigate to Application tab -> Storage -> Local Storage -> https://market.tonnel
 from tonnelmp import getGifts
 print(getGifts(gift_name="toy bear", limit=1))
 ```
+
+`limit` will be the maximum len of the list.
 
 **Output (list object with dicts):**
 
@@ -49,16 +70,27 @@ print(getGifts(gift_name="toy bear", limit=1))
 ```
 
 gift_num - telegram gift number
+
 customEmojiId - telegram custom emoji id
+
 gift_id - tonnel gift id
+
 name - gift name
+
 model - gift model
+
 asset - asset name
+
 symbol - symbol name
+
 backdrop - backdrop name
+
 price - price in TON without 10% fee.
+
 status - status of the gift - forsale / auction (not sure about auction sorry)
+
 auction - either None or auction data in dict
+
 export_at - time of when the gift has been placed for sale / auction
 
 #### Balances example:
@@ -143,7 +175,7 @@ getAuctions(gift_name: str, model: str, backdrop: str, symbol: str, gift_num: in
   *limit maximum* = 30
   *asset:* `"TON", "USDT", "TONNEL"`
 
-#### myGifts() - requires auth
+#### myGifts()
 
 ```python
 myGifts(listed: bool, page: int, limit: int, user_auth: str) -> list:
@@ -154,7 +186,7 @@ myGifts(listed: bool, page: int, limit: int, user_auth: str) -> list:
 - Available options:
   *listed (Default=True):* `True / False.` If False, will return unlisted gifts.
 
-#### listForSale() - requires auth
+#### listForSale()
 
 ```python
 listForSale(gift_id: int, price: int | float, user_auth: str) -> dict
@@ -164,7 +196,7 @@ listForSale(gift_id: int, price: int | float, user_auth: str) -> dict
 - Returns dict object with status. Either success or error.
 - **Required: `user_auth, gift_id, price`**
 
-#### cancelSale() - requires auth
+#### cancelSale()
 
 ```python
 cancelSale(gift_id: int,user_auth: str) -> dict
@@ -174,7 +206,7 @@ cancelSale(gift_id: int,user_auth: str) -> dict
 - Returns dict object with status. Either success or error.
 - **Required: `user_auth, gift_id`**
 
-#### saleHistory() - requires auth
+#### saleHistory()
 
 *idk why but this function requires auth :D you can try putting empty authData, maybe i've done something wrong*
 
@@ -189,7 +221,49 @@ saleHistory(authData: str, page: int, limit: int, type: str, gift_name: str, mod
   *type (Default="ALL"):* `"ALL", "SALE", "INTERNAL_SALE", "BID"`
 - limit maximum = 50
 
-#### info() - requires auth
+#### withdraw()
+
+```python
+withdraw(wallet: str, authData: str, amount: int | float, asset: str = "TON") -> dict:
+```
+
+- Withdraw amount of asset to specified TON wallet address.
+- **Requires: `wallet, authData, amount`**
+- *Options:* `asset - "TON", "USDT", "TONNEL"`
+
+#### returnGift()
+
+```python
+returnGift(gift_id: int, authData: str) -> dict:
+```
+
+*Not tested yet*
+
+- Return gift from Tonnel Marketplace to your Telegram account.
+- **Requires: `gift_id, authData`**
+
+#### mintGift()
+
+```python
+mintGift(authData: str, wallet: str, gift_id: int) -> dict:
+```
+
+*Not tested yet*
+
+- Mints gift to specified TON wallet address.
+- **Minting cost 0.3 TON**
+- **Requires: `authData, wallet, gift_id`**
+
+#### switchTransfer()
+
+```python
+switchTransfer(authData: str, transferGift: bool) -> dict:
+```
+
+- Switches internal transfer mode on your Tonnel Marketplace account.
+- **Requires: `authData`**
+
+#### info()
 
 ```python
 info(authData: str) -> dict
@@ -198,17 +272,18 @@ info(authData: str) -> dict
 - Returns a dict object containing your balances, memo, referrer etc.
 - **Requires: `authData`**
 
-#### buyGift() - requires auth
+#### buyGift()
 
 ```python
-buyGift(gift_id: int, price: int | float, authData: str) -> dict
+buyGift(gift_id: int, price: int | float, authData: str, receiver: int, anonymously: bool = False, showPrice: bool = False) -> dict
 ```
 
 - Buy a gift with known gift_id and price in TON. // price - raw price (you dont have to multiply it by 1.1). both params can be retrieved from getGifts()
+- *[Not tested yet] Optional*: `receiver` - Telegram user id of the receiver (if you want to send the gift to someone else); `anonymously` - bool value, wether to show user who bought the gift or not; `showPrice` - bool value, wether to show user the price or not
 - **Requires: `gift_id, price, authData`**
 - Returns dict object with status. Either success or error.
 
-#### createAuction() - requires auth
+#### createAuction()
 
 ```python
 createAuction(gift_id: int, starting_bid: int | float, authData: str, duration: int) -> dict
@@ -220,7 +295,7 @@ createAuction(gift_id: int, starting_bid: int | float, authData: str, duration: 
 - Available options:
   *duration (Default=1):* Duration in hours. Can be one of these options - `[1, 2, 3, 6, 12, 24]`
 
-#### cancelAuction() - requires auth
+#### cancelAuction()
 
 ```python
 cancelAuction(auction_id: str, authData: str) -> dict
@@ -229,6 +304,18 @@ cancelAuction(auction_id: str, authData: str) -> dict
 - Cancel auction with known auction_id (can be retrieved from getAuctions() or mygifts())
 - **Requires: `auction_id, authData`**
 - Returns dict object with status. Either success or error
+
+#### placeBid()
+
+```python
+placeBid(auction_id: str, amount: int|float, authData: str, asset: str="TON") -> dict:
+```
+
+*Not tested yet*
+
+- Place a bid on known `auction_id`
+- Not recommended to change asset value (i dont think its possible to bid in USDT/TONNEL)
+- **Requires: `auction_id, amount, authData`**
 
 ## Examples
 
@@ -258,8 +345,7 @@ print(listForSale(gift_id=123, price=123, user_auth=myAuthData)
 
 ## TODO + info
 
-currently there are at least 5 functions missing - mintGift(), returnGift(), giftGift(), payFee(), placeBid()
-also willing to add multiple gift buys, creating buy orders etc.
+will add functions for managing orders soon; also need unlockListing() function
 
 if you use this module please send your feedback [to my telegram](https://t.me/perfectlystill)
 

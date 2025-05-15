@@ -8,6 +8,11 @@ from tonnelmp.marketapi import (
     createAuction,
     cancelAuction,
     info,
+    placeBid,
+    returnGift,
+    withdraw,
+    switchTransfer,
+    mintGift,
     Gift
 )
 
@@ -24,5 +29,10 @@ __all__ = [
     "cancelAuction",
     "generate_wtf",
     "info",
+    "placeBid",
+    "returnGift",
+    "withdraw",
+    "switchTransfer",
+    "mintGift",
     "Gift"
 ]

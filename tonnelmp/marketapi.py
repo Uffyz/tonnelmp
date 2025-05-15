@@ -582,16 +582,22 @@ def cancelAuction(
 def buyGift(
     gift_id: int,
     price: int | float,
-    authData: str
-    ) -> dict:
+    authData: str,
+    receiver: str = None,
+    anonymously: bool = False,
+    showPrice: bool = False
+) -> dict:
     """
     [Requires authentication]
-    Purchases a gift from the marketplace.
+    Purchases or gifts a gift from the marketplace.
 
     Args:
         gift_id (int): The Tonnel Gift ID of the gift to purchase (not gift_num / telegram gift number).
         price (int | float): The price at which the gift is to be purchased.
         authData (str): The user's auth data required for authorization.
+        receiver (int, optional): Telegram ID of the gift recipient (if gifting). Tested only with int values, may work with str, may not.
+        anonymously (bool, optional): Whether to gift anonymously. Defaults to False.
+        showPrice (bool, optional): Whether to show the gift price to the recipient. Defaults to False.
 
     Returns:
         dict: A dictionary containing the response data from the API. Either success or error.
@@ -625,12 +631,20 @@ def buyGift(
         "wtf": wtf
     }
 
+    if receiver:
+        payload.update({
+            "receiver": receiver,
+            "anonymously": anonymously,
+            "showPrice": showPrice
+        })
+
     response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
 
     if response.status_code != 200:
         raise Exception(f"buy_gift failed {response.status_code}: {response.text}")
 
     return response.json()
+
 
 def info(
     authData: str
@@ -738,3 +752,216 @@ class Gift:
     def to_dict(self) -> dict:
         """Return the raw data as a dictionary."""
         return self._data.copy()
+
+def withdraw(
+    wallet: str,
+    authData: str,
+    amount: int | float,
+    asset: str = "TON"
+) -> dict:
+    """
+    [Requires authentication]
+    Withdraws a specified amount of an asset to a given TON wallet.
+
+    Args:
+        wallet (str): TON wallet address to withdraw to.
+        authData (str): Authentication string for the user.
+        amount (int | float): >= 0.5. Amount to withdraw (fee of 0.001 will be subtracted internally).
+        asset (str): Asset to withdraw. Options: "TON", "USDT", "TONNEL". Defaults to "TON".
+
+    Returns:
+        dict: Response from the withdrawal API.
+
+    Raises:
+        ValueError: If any required parameters are missing or invalid.
+        Exception: If the API request fails.
+    """
+
+    if not wallet or not authData or not amount:
+        raise ValueError("wallet, authData, and amount are required fields")
+
+    if asset not in {"TON", "USDT", "TONNEL"}:
+        raise ValueError("Invalid asset type. Must be 'TON', 'USDT', or 'TONNEL'.")
+
+    url = "https://gifts.coffin.meme/api/balance/withdraw"
+
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0"
+    }
+
+    payload = {
+        "wallet": wallet,
+        "authData": authData,
+        "amount": float(amount),
+        "asset": asset
+    }
+
+    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+
+    if response.status_code != 200:
+        raise Exception(f"withdraw failed {response.status_code}: {response.text}")
+
+    return response.json()
+
+def returnGift(gift_id: int, authData: str) -> dict:
+    """
+    [Requires authentication]
+    Returns a purchased gift back to the Tonnel Marketplace.
+
+    Args:
+        gift_id (int): Tonnel Gift ID to return.
+        authData (str): The user's authentication data.
+
+    Returns:
+        dict: The API's response data indicating success or failure.
+
+    Raises:
+        ValueError: If required arguments are missing.
+        Exception: If the API request fails with a non-200 status.
+    """
+    if not gift_id or not authData:
+        raise ValueError("Both gift_id and authData are required.")
+
+    url = "https://gifts.coffin.meme/api/returnGift"
+
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0"
+    }
+
+    payload = {
+        "gift_id": gift_id,
+        "authData": authData
+    }
+
+    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+
+    if response.status_code != 200:
+        raise Exception(f"returnGift failed {response.status_code}: {response.text}")
+
+    return response.json()
+
+def placeBid(auction_id: str, amount: int | float, authData: str, asset: str = "TON") -> dict:
+    """
+    [Requires authentication]
+    Places a bid on an auctioned gift in the Tonnel Marketplace.
+
+    Args:
+        auction_id (str): The ID of the auction.
+        amount (int | float): The bid amount.
+        asset (str): The asset used for the bid ("TON", "USDT", "TONNEL"). Defaults to "TON".
+        authData (str): The user's authentication data.
+
+    Returns:
+        dict: The response from the API indicating success or error.
+
+    Raises:
+        ValueError: If required arguments are missing.
+        Exception: If the API request fails or returns a non-200 status.
+    """
+    if not auction_id or not amount or not authData:
+        raise ValueError("All arguments (auction_id, amount, authData) are required.")
+
+    url = "https://gifts.coffin.meme/api/auction/bid"
+
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0"
+    }
+
+    payload = {
+        "authData": authData,
+        "auction_id": auction_id,
+        "amount": float(amount),
+        "asset": asset
+    }
+
+    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+
+    if response.status_code != 200:
+        raise Exception(f"placeBid failed {response.status_code}: {response.text}")
+
+    return response.json()
+
+def switchTransfer(authData: str, transferGift: bool) -> dict:
+    """
+    [Requires authentication]
+    Toggles internal gift transfer mode in the Tonnel Marketplace.
+
+    Args:
+        authData (str): The user's authentication data.
+        transferGift (bool): Set to True to enable internal transfer mode, False to disable.
+
+    Returns:
+        dict: The response from the API indicating success or failure.
+
+    Raises:
+        ValueError: If authData is not provided.
+        Exception: If the API request fails.
+    """
+    if not authData:
+        raise ValueError("authData is required.")
+
+    url = "https://gifts.coffin.meme/api/user/switchTransfer"
+
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0"
+    }
+
+    payload = {
+        "transferGift": transferGift,
+        "authData": authData
+    }
+
+    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+
+    if response.status_code != 200:
+        raise Exception(f"switchTransfer failed {response.status_code}: {response.text}")
+
+    return response.json()
+
+def mintGift(authData: str, wallet: str, gift_id: int) -> dict:
+    """
+    [Requires authentication]
+    Initiates the minting process of a gift to the specified wallet.
+
+    Args:
+        authData (str): The user's authentication data.
+        wallet (str): The recipient's TON wallet address.
+        gift_id (int): The sale ID of the gift to be minted.
+
+    Returns:
+        dict: The response from the API indicating success or failure.
+
+    Raises:
+        ValueError: If any required argument is missing.
+        Exception: If the API request fails.
+    """
+    if not authData:
+        raise ValueError("authData is required.")
+    if not wallet:
+        raise ValueError("wallet is required.")
+    if not gift_id:
+        raise ValueError("gift_id is required.")
+
+    url = "https://gifts.coffin.meme/api/mint/start"
+
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0"
+    }
+
+    payload = {
+        "authData": authData,
+        "wallet": wallet,
+        "gift_id": gift_id
+    }
+
+    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+
+    if response.status_code != 200:
+        raise Exception(f"mintGift failed {response.status_code}: {response.text}")
+
+    return response.json()

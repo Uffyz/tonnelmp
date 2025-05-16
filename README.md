@@ -356,6 +356,7 @@ print(listForSale(gift_id=123, price=123, user_auth=myAuthData)
 ## TODO + info
 
 will add functions for managing orders soon; also need unlockListing() function
+also will add multiple gifts/models/backdrops/symbols available to filter by (currently you can filter only by one gift/model/backdrop/symbol)
 
 if you use this module please send your feedback [to my telegram](https://t.me/perfectlystill)
 

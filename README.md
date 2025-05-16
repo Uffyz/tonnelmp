@@ -42,6 +42,11 @@ Then navigate to Application tab -> Storage -> Local Storage -> https://market.t
 - Improved `getGifts(), getAuctions(), saleHistory()` functions. Now you can pass model/backdrop/symbol with or without rarity percentage included *(before this update you could only pass without rarity percentage)*
 - Example: `getGifts(gift_name="toy bear", model="wizard")` - without rarity percentage; `getGifts(gift_name="toy bear", model="wizard (1.5%)") `- with rarity percentage included
 
+#### Version 1.0.5.1
+
+- Added `unlockListing()` function
+- Updated documentation
+
 ## Some returns examples:
 
 #### Gift example:
@@ -216,6 +221,16 @@ cancelSale(gift_id: int,user_auth: str) -> dict
 - Returns dict object with status. Either success or error.
 - **Required: `user_auth, gift_id`**
 
+#### unlockListing()
+
+```python
+unlockListing(authData: str, gift_id: int) -> dict:
+```
+
+- Unlock listing for a known gift_id (cost 0.1 TON)
+- You can check if your gift needs to be unlocked by using `myGifts(listed=False, user_auth="")`. If `'limited': True` in the response, your gift needs to be unlocked.
+- **Requires: `authData, gift_id; 0.1 TON on the balance`**
+
 #### saleHistory()
 
 *idk why but this function requires auth :D you can try putting empty authData, maybe i've done something wrong*
@@ -262,7 +277,7 @@ mintGift(authData: str, wallet: str, gift_id: int) -> dict:
 
 - Mints gift to specified TON wallet address.
 - **Minting cost 0.3 TON**
-- **Requires: `authData, wallet, gift_id`**
+- **Requires: `authData, wallet, gift_id; 0.3 TON on the balance`**
 
 #### switchTransfer()
 
@@ -355,8 +370,7 @@ print(listForSale(gift_id=123, price=123, user_auth=myAuthData)
 
 ## TODO + info
 
-will add functions for managing orders soon; also need unlockListing() function
-also will add multiple gifts/models/backdrops/symbols available to filter by (currently you can filter only by one gift/model/backdrop/symbol)
+will add functions for managing orders soon
 
 if you use this module please send your feedback [to my telegram](https://t.me/perfectlystill)
 

@@ -1013,3 +1013,43 @@ def mintGift(authData: str, wallet: str, gift_id: int) -> dict:
         raise Exception(f"Request failed with status code {response.status_code}")
 
     return response.json()
+
+def unlockListing(authData: str, gift_id: int) -> dict:
+    """
+    [Requires authentication]
+    Unlocks a listing on the Tonnel Marketplace, allowing it to be relisted or managed.
+
+    Args:
+        authData (str): The user's authentication token.
+        gift_id (int): The sale ID of the gift/listing to unlock.
+
+    Returns:
+        dict: API response indicating success or failure.
+
+    Raises:
+        ValueError: If required fields are missing.
+        Exception: If the API request fails.
+    """
+    if not authData:
+        raise ValueError("authData is required.")
+    if not gift_id:
+        raise ValueError("sale_id is required.")
+
+    url = "https://gifts.coffin.meme/api/unlock"
+
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0"
+    }
+
+    payload = {
+        "authData": authData,
+        "sale_id": gift_id
+    }
+
+    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+
+    if response.status_code != 200:
+        raise Exception(f"unlockListing failed {response.status_code}: {response.text}")
+
+    return response.json()

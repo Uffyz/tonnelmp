@@ -76,13 +76,22 @@ def getGifts(
         filter_dict["gift_name"] = gift_name.title()
 
     if model:
-        filter_dict["model"] = {"$regex": f"^{model.title()} \\("}
+        if "(" not in model:
+            filter_dict["model"] = {"$regex": f"^{model.strip().title()} \\("}
+        else:
+            filter_dict["model"] = f"{model.title()}"
 
     if backdrop:
-        filter_dict["backdrop"] = {"$regex": f"^{backdrop.title()} \\("}
+        if "(" not in backdrop:
+            filter_dict["backdrop"] = {"$regex": f"^{backdrop.strip().title()} \\("}
+        else:
+            filter_dict["backdrop"] = f"{backdrop.title()}"
 
     if symbol:
-        filter_dict["symbol"] = {"$regex": f"^{symbol.title()} \\("}
+        if "(" not in symbol:
+            filter_dict["symbol"] = {"$regex": f"^{symbol.strip().title()} \\("}
+        else:
+            filter_dict["symbol"] = f"{symbol.title()}"
 
     if gift_num is not None:
         filter_dict["gift_num"] = str(gift_num)
@@ -103,8 +112,10 @@ def getGifts(
 
     response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110")
 
-    if response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}: {response.text}")
+    if response.status_code == 429:
+        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -182,8 +193,10 @@ def myGifts(
 
     response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110")
 
-    if response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}: {response.text}")
+    if response.status_code == 429:
+        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -235,8 +248,10 @@ def listForSale(
 
     response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
 
-    if response.status_code != 200:
-        raise Exception(f"Request failed: {response.status_code} — {response.text}")
+    if response.status_code == 429:
+        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -284,8 +299,10 @@ def cancelSale(
 
     response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
 
-    if response.status_code != 200:
-        raise Exception(f"Request failed: {response.status_code} — {response.text}")
+    if response.status_code == 429:
+        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -345,14 +362,17 @@ def saleHistory(
 
     filter_dict = {}
 
-    if gift_name:
-        filter_dict["gift_name"] = gift_name.title()
-
     if model:
-        filter_dict["model"] = {"$regex": f"^{model.title()} \\("}
+        if "(" not in model:
+            filter_dict["model"] = {"$regex": f"^{model.strip().title()} \\("}
+        else:
+            filter_dict["model"] = f"{model.title()}"
 
     if backdrop:
-        filter_dict["backdrop"] = {"$regex": f"^{backdrop.title()} \\("}
+        if "(" not in backdrop:
+            filter_dict["backdrop"] = {"$regex": f"^{backdrop.strip().title()} \\("}
+        else:
+            filter_dict["backdrop"] = f"{backdrop.title()}"
 
     payload = {
         "authData": authData,
@@ -365,8 +385,10 @@ def saleHistory(
 
     response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110")
 
-    if response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}: {response.text}")
+    if response.status_code == 429:
+        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -434,17 +456,23 @@ def getAuctions(
         "asset": asset
     }
 
-    if gift_name:
-        filter_dict["gift_name"] = gift_name.title()
-
     if model:
-        filter_dict["model"] = {"$regex": f"^{model.title()} \\("}
+        if "(" not in model:
+            filter_dict["model"] = {"$regex": f"^{model.strip().title()} \\("}
+        else:
+            filter_dict["model"] = f"{model.title()}"
 
     if backdrop:
-        filter_dict["backdrop"] = {"$regex": f"^{backdrop.title()} \\("}
+        if "(" not in backdrop:
+            filter_dict["backdrop"] = {"$regex": f"^{backdrop.strip().title()} \\("}
+        else:
+            filter_dict["backdrop"] = f"{backdrop.title()}"
 
     if symbol:
-        filter_dict["symbol"] = {"$regex": f"^{symbol.title()} \\("}
+        if "(" not in symbol:
+            filter_dict["symbol"] = {"$regex": f"^{symbol.strip().title()} \\("}
+        else:
+            filter_dict["symbol"] = f"{symbol.title()}"
 
     if gift_num:
         filter_dict["gift_num"] = str(gift_num)
@@ -465,8 +493,10 @@ def getAuctions(
 
     response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110")
 
-    if response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}: {response.text}")
+    if response.status_code == 429:
+        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -531,8 +561,10 @@ def createAuction(
     response = requests.post(url, headers=headers, json=payload,
                          impersonate="chrome110")
 
-    if response.status_code != 200:
-        raise Exception(f"createAuction failed {response.status_code}: {response.text}")
+    if response.status_code == 429:
+        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -574,8 +606,10 @@ def cancelAuction(
 
     response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
 
-    if response.status_code != 200:
-        raise Exception(f"cancelAuction failed {response.status_code}: {response.text}")
+    if response.status_code == 429:
+        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -640,8 +674,10 @@ def buyGift(
 
     response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
 
-    if response.status_code != 200:
-        raise Exception(f"buy_gift failed {response.status_code}: {response.text}")
+    if response.status_code == 429:
+        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -683,8 +719,10 @@ def info(
 
     response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
 
-    if response.status_code != 200:
-        raise Exception(f"info failed {response.status_code}: {response.text}")
+    if response.status_code == 429:
+        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -799,8 +837,10 @@ def withdraw(
 
     response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
 
-    if response.status_code != 200:
-        raise Exception(f"withdraw failed {response.status_code}: {response.text}")
+    if response.status_code == 429:
+        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -837,8 +877,10 @@ def returnGift(gift_id: int, authData: str) -> dict:
 
     response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
 
-    if response.status_code != 200:
-        raise Exception(f"returnGift failed {response.status_code}: {response.text}")
+    if response.status_code == 429:
+        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -879,8 +921,10 @@ def placeBid(auction_id: str, amount: int | float, authData: str, asset: str = "
 
     response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
 
-    if response.status_code != 200:
-        raise Exception(f"placeBid failed {response.status_code}: {response.text}")
+    if response.status_code == 429:
+        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -917,8 +961,10 @@ def switchTransfer(authData: str, transferGift: bool) -> dict:
 
     response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
 
-    if response.status_code != 200:
-        raise Exception(f"switchTransfer failed {response.status_code}: {response.text}")
+    if response.status_code == 429:
+        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -961,7 +1007,9 @@ def mintGift(authData: str, wallet: str, gift_id: int) -> dict:
 
     response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
 
-    if response.status_code != 200:
-        raise Exception(f"mintGift failed {response.status_code}: {response.text}")
+    if response.status_code == 429:
+        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"Request failed with status code {response.status_code}")
 
     return response.json()

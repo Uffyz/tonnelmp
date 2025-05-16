@@ -32,6 +32,16 @@ Then navigate to Application tab -> Storage -> Local Storage -> https://market.t
 - Added `switchTransfer()` function.
 - Updated documentation
 
+#### Versions 1.0.4.1 - 1.0.4.2
+
+- Minor changes - replaced `response.text` with status code on exception due to too many lines in it (trashes out logging).
+- forgot to add myGifts() to init XD, added and the function should work
+
+#### Version 1.0.5
+
+- Improved `getGifts(), getAuctions(), saleHistory()` functions. Now you can pass model/backdrop/symbol with or without rarity percentage included *(before this update you could only pass without rarity percentage)*
+- Example: `getGifts(gift_name="toy bear", model="wizard")` - without rarity percentage; `getGifts(gift_name="toy bear", model="wizard (1.5%)") `- with rarity percentage included
+
 ## Some returns examples:
 
 #### Gift example:

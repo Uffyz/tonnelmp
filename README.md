@@ -2,6 +2,33 @@
 
 This is a simple module that will help you interacting with Tonnel Marketplace API. Tested almost every API myself so you dont have to blindly test it.
 
+#### Functionality
+
+***Gifts:***
+
+- Searching for gifts with a lot of filters available
+- Buying, listing for sale, cancelling the sale
+- Minting gift, returning it to your telegram account
+- Retrieving gifts sale history
+- *[SOON] Creating buy orders, staking gifts*
+
+***Auctions:***
+
+- Searching for auctions
+- Bidding, creating auction, cancelling auction
+
+***Giveaways:***
+
+- Retrieving giveaway info
+- Joining giveaway
+- *[SOON] Creating giveaway*
+
+***Account:***
+
+- Retrieving balances, memo etc.
+- Withdrawing funds
+- Switching internal purchase on/off
+
 ## Installing
 
 ```python
@@ -45,6 +72,11 @@ Then navigate to Application tab -> Storage -> Local Storage -> https://market.t
 #### Version 1.0.5.1
 
 - Added `unlockListing()` function
+- Updated documentation
+
+#### Version 1.0.6
+
+- Added `giveawayInfo()` and `joinGiveaway()` functions
 - Updated documentation
 
 ## Some returns examples:
@@ -131,9 +163,11 @@ print(info(authData="your_auth_data"))
 }
 ```
 
+# Documentation
+
 ## Gift Class
 
-Can wrap gift dict
+Wrapper for gift dictionary
 
 #### Attributes
 
@@ -368,9 +402,26 @@ myAuthData = " ....... "
 print(listForSale(gift_id=123, price=123, user_auth=myAuthData)
 ```
 
-## TODO + info
+#### giveawayInfo()
 
-will add functions for managing orders soon
+```python
+giveawayInfo(giveaway_id: str, authData: str) -> dict:
+```
+
+- Retrieve giveaway info from giveaway_id
+- **Requires: `authData, giveaway_id`**
+
+#### joinGiveaway()
+
+```python
+joinGiveaway(giveaway_id: str, authData: str, ticketCount: int | None=None) -> dict
+```
+
+- Join giveaway with known giveaway_id
+- Ticketcount is optional argument. Required if giveaway is paid.
+- **Requires: `authData, giveaway_id`**
+
+## Info
 
 if you use this module please send your feedback [to my telegram](https://t.me/perfectlystill)
 

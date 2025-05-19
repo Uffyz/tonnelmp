@@ -189,7 +189,7 @@ Wrapper for gift dictionary
 #### Example
 
 ```python
-from tonnelmp import Gift, getGifts()
+from tonnelmp import Gift, getGifts
 gift = Gift(getGifts(limit=1, sort="latest")[0])
 print(gift.name, gift.gift_num, gift.gift_id, gift.price)
 ```

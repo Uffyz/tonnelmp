@@ -1053,3 +1053,86 @@ def unlockListing(authData: str, gift_id: int) -> dict:
         raise Exception(f"unlockListing failed {response.status_code}: {response.text}")
 
     return response.json()
+
+def giveawayInfo(giveaway_id: str, authData: str) -> dict:
+    """
+    [Requires authentication]
+    Retrieves information about a specific giveaway from the Tonnel Marketplace.
+
+    Args:
+        giveaway_id (str): The ID of the giveaway to retrieve info about.
+        authData (str): The user's authentication token.
+
+    Returns:
+        dict: API response containing giveaway information.
+
+    Raises:
+        ValueError: If required fields are missing.
+        Exception: If the API request fails.
+    """
+    if not authData:
+        raise ValueError("authData is required.")
+    if not giveaway_id:
+        raise ValueError("giveaway_id is required.")
+
+    url = "https://gifts2.tonnel.network/api/giveaway/info"
+
+    headers = {
+        "Content-Type": "application/json",
+        "User-Agent": "Mozilla/5.0"
+    }
+
+    payload = {
+        "giveAwayId": giveaway_id,
+        "authData": authData
+    }
+
+    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+
+    if response.status_code != 200:
+        raise Exception(f"getGiveawayInfo failed {response.status_code}: {response.text}")
+
+    return response.json()
+
+def joinGiveaway(
+    giveaway_id: str,
+    authData: str,
+    ticketCount: int | None = None
+) -> dict:
+    """
+    Joins a giveaway on the Tonnel Marketplace.
+
+    Args:
+        giveaway_id (str): The ID of the giveaway.
+        authData (str): Authentication data string.
+        ticketCount (int, optional): Number of tickets to use (if the giveaway is paid).
+
+    Returns:
+        dict: API response.
+    """
+    if not authData:
+        raise ValueError("authData is required")
+
+    timestamp, wtf = generate_wtf()
+
+    payload = {
+        "authData": authData,
+        "giveAwayId": giveaway_id,
+        "timestamp": timestamp,
+        "wtf": wtf,
+    }
+
+    if ticketCount is not None:
+        payload["ticketCount"] = ticketCount
+
+    url = "https://gifts.coffin.meme/api/giveaway/join"
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+
+    if response.status_code != 200:
+        raise Exception(f"joinGiveaway failed {response.status_code}: {response.text}")
+
+    return response.json()

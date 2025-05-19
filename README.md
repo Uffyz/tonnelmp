@@ -376,6 +376,25 @@ placeBid(auction_id: str, amount: int|float, authData: str, asset: str="TON") ->
 - Not recommended to change asset value (i dont think its possible to bid in USDT/TONNEL)
 - **Requires: `auction_id, amount, authData`**
 
+#### giveawayInfo()
+
+```python
+giveawayInfo(giveaway_id: str, authData: str) -> dict:
+```
+
+- Retrieve giveaway info from giveaway_id
+- **Requires: `authData, giveaway_id`**
+
+#### joinGiveaway()
+
+```python
+joinGiveaway(giveaway_id: str, authData: str, ticketCount: int | None=None) -> dict
+```
+
+- Join giveaway with known giveaway_id
+- Ticketcount is optional argument. Required if giveaway is paid.
+- **Requires: `authData, giveaway_id`**
+
 ## Examples
 
 Getting gift floor for *Toy Bear* with model *Wizard*:
@@ -401,25 +420,6 @@ from tonnelmp import listForSale
 myAuthData = " ....... "
 print(listForSale(gift_id=123, price=123, user_auth=myAuthData)
 ```
-
-#### giveawayInfo()
-
-```python
-giveawayInfo(giveaway_id: str, authData: str) -> dict:
-```
-
-- Retrieve giveaway info from giveaway_id
-- **Requires: `authData, giveaway_id`**
-
-#### joinGiveaway()
-
-```python
-joinGiveaway(giveaway_id: str, authData: str, ticketCount: int | None=None) -> dict
-```
-
-- Join giveaway with known giveaway_id
-- Ticketcount is optional argument. Required if giveaway is paid.
-- **Requires: `authData, giveaway_id`**
 
 ## Info
 

@@ -136,6 +136,8 @@ price - price in TON without 10% fee.
 
 status - status of the gift - forsale / auction (not sure about auction sorry)
 
+limited - true/false - wether listing the gift needs to be unlocked or not (0.1 TON required to unlock the listing)
+
 auction - either None or auction data in dict
 
 export_at - time of when the gift has been placed for sale / auction

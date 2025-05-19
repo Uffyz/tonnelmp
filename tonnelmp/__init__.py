@@ -13,6 +13,8 @@ from tonnelmp.marketapi import (
     withdraw,
     switchTransfer,
     mintGift,
+    joinGiveaway,
+    giveawayInfo,
     Gift
 )
 
@@ -34,5 +36,7 @@ __all__ = [
     "withdraw",
     "switchTransfer",
     "mintGift",
+    "joinGiveaway",
+    "giveawayInfo",
     "Gift"
 ]

@@ -1,7 +1,5 @@
 # ***Tonnel Marketplace API***
 
-[![pypi](https://img.shields.io/pypi/v/tonnelmp.svg)](https://pypi.org/project/tonnelmp/) [![stars](https://img.shields.io/github/stars/bleach-hub/tonnelmp?style=social)](https://github.com/bleach-hub/tonnelmp/stargazers) [![help](https://img.shields.io/badge/Telegram-@perfectlystill-blue?logo=telegram)](https://t.me/perfectlystill)
-
 This is a simple module that will help you interacting with Tonnel Marketplace API. Tested almost every API myself so you dont have to blindly test it.
 
 #### Functionality
@@ -9,6 +7,7 @@ This is a simple module that will help you interacting with Tonnel Marketplace A
 ***Gifts:***
 
 - Searching for gifts with a lot of filters available
+- Get all floor prices for all the gifts / models
 - Buying, listing for sale, cancelling the sale
 - Minting gift, returning it to your telegram account
 - Retrieving gifts sale history
@@ -81,6 +80,12 @@ Then navigate to Application tab -> Storage -> Local Storage -> https://market.t
 - Added `giveawayInfo()` and `joinGiveaway()` functions
 - Updated documentation
 
+#### Version 1.0.7
+
+- Added `filterStats()` and `filterStatsPretty()` functions
+- Changed `user_auth` arg in most of the functions to `authData` because it was annoying me xd
+- Updated `joinGiveaway()` function to use chrome110 impersonation
+
 ## Some returns examples:
 
 #### Gift example:
@@ -138,8 +143,6 @@ price - price in TON without 10% fee.
 
 status - status of the gift - forsale / auction (not sure about auction sorry)
 
-limited - true/false - wether listing the gift needs to be unlocked or not (0.1 TON required to unlock the listing)
-
 auction - either None or auction data in dict
 
 export_at - time of when the gift has been placed for sale / auction
@@ -191,7 +194,7 @@ Wrapper for gift dictionary
 #### Example
 
 ```python
-from tonnelmp import Gift, getGifts
+from tonnelmp import Gift, getGifts()
 gift = Gift(getGifts(limit=1, sort="latest")[0])
 print(gift.name, gift.gift_num, gift.gift_id, gift.price)
 ```
@@ -207,7 +210,7 @@ Winter Wreath 23548 4848019 9.8
 #### getGifts()
 
 ```python
-getGifts(gift_name: str, model: str, backdrop: str, symbol: str, gift_num: int, page: int, limit: int, sort: str, price_range: list | int, asset: str, user_auth: str) -> list
+getGifts(gift_name: str, model: str, backdrop: str, symbol: str, gift_num: int, page: int, limit: int, sort: str, price_range: list | int, asset: str, authData: str) -> list
 ```
 
 - Returns a list with dict objects containing gifts details.
@@ -219,7 +222,7 @@ getGifts(gift_name: str, model: str, backdrop: str, symbol: str, gift_num: int, 
 #### getAuctions()
 
 ```python
-getAuctions(gift_name: str, model: str, backdrop: str, symbol: str, gift_num: int, page: int, limit: int, sort: str, price_range: list | int=0, asset: str, user_auth: str="") -> list
+getAuctions(gift_name: str, model: str, backdrop: str, symbol: str, gift_num: int, page: int, limit: int, sort: str, price_range: list | int=0, asset: str, authData: str="") -> list
 ```
 
 - Get auctions with optional filters. Doesnt require anything at all.
@@ -231,33 +234,33 @@ getAuctions(gift_name: str, model: str, backdrop: str, symbol: str, gift_num: in
 #### myGifts()
 
 ```python
-myGifts(listed: bool, page: int, limit: int, user_auth: str) -> list:
+myGifts(listed: bool, page: int, limit: int, authData: str) -> list:
 ```
 
 - Returns a list with dict objects containing gifts details.
-- **Required: `user_auth`**
+- **Required: `authData`**
 - Available options:
   *listed (Default=True):* `True / False.` If False, will return unlisted gifts.
 
 #### listForSale()
 
 ```python
-listForSale(gift_id: int, price: int | float, user_auth: str) -> dict
+listForSale(gift_id: int, price: int | float, authData: str) -> dict
 ```
 
 - List for sale a gift with known gift_id *(tonnel gift_id, **not telegram gift_num**; can be retrieved from myGifts()/getGifts())*
 - Returns dict object with status. Either success or error.
-- **Required: `user_auth, gift_id, price`**
+- **Required: `authData, gift_id, price`**
 
 #### cancelSale()
 
 ```python
-cancelSale(gift_id: int,user_auth: str) -> dict
+cancelSale(gift_id: int,authData: str) -> dict
 ```
 
 - Cancel sale of the gift with known gift_id
 - Returns dict object with status. Either success or error.
-- **Required: `user_auth, gift_id`**
+- **Required: `authData, gift_id`**
 
 #### unlockListing()
 
@@ -266,7 +269,7 @@ unlockListing(authData: str, gift_id: int) -> dict:
 ```
 
 - Unlock listing for a known gift_id (cost 0.1 TON)
-- You can check if your gift needs to be unlocked by using `myGifts(listed=False, user_auth="")`. If `'limited': True` in the response, your gift needs to be unlocked.
+- You can check if your gift needs to be unlocked by using `myGifts(listed=False, authData="")`. If `'limited': True` in the response, your gift needs to be unlocked.
 - **Requires: `authData, gift_id; 0.1 TON on the balance`**
 
 #### saleHistory()
@@ -399,6 +402,28 @@ joinGiveaway(giveaway_id: str, authData: str, ticketCount: int | None=None) -> d
 - Ticketcount is optional argument. Required if giveaway is paid.
 - **Requires: `authData, giveaway_id`**
 
+#### filterStats()
+
+```python
+filterStats(authData: str) -> dict:
+```
+
+- Completely new function added by Freeman (big W), saves you a lot of `getGifts()` requests if needed floor for model / backdrop etc.
+- Returns ungrouped dictionary with all gifts and models splitted by underscore containing raw floorprice and count of the model (with rarity) on the market.
+- **Requires: `authData`**
+- Return format: `{status: "success/error", "data": {"Toy Bear_Wizard (1.5%)": {"floorprice": int, "howMany": int}}}`
+
+#### filterStatsPretty()
+
+```python
+filterStatsPretty(authData: str) -> dict:
+```
+
+- Prettier version of `filterStats()`.
+- Returns grouped dictionary of all the gifts and models.
+- Example: `filterStatsPretty(authData)['data']['Toy Bear']['Wizard (1.5%)']` - will return `{'floorPrice': int, 'howMany': int} `, floorprice is raw (without 10% fee added up). *(rarity and capitalization required !!!)*
+- **Requires: `authData`**
+
 ## Examples
 
 Getting gift floor for *Toy Bear* with model *Wizard*:
@@ -422,7 +447,7 @@ Listing gift for sale
 ```python
 from tonnelmp import listForSale
 myAuthData = " ....... "
-print(listForSale(gift_id=123, price=123, user_auth=myAuthData)
+print(listForSale(gift_id=123, price=123, authData=myAuthData)
 ```
 
 ## Info

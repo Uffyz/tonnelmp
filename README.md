@@ -1,3 +1,5 @@
+[![pypi](https://img.shields.io/pypi/v/tonnelmp.svg)](https://pypi.org/project/tonnelmp/) [![stars](https://img.shields.io/github/stars/bleach-hub/tonnelmp?style=social)](https://github.com/bleach-hub/tonnelmp/stargazers) [![help](https://img.shields.io/badge/Telegram-@perfectlystill-blue?logo=telegram)](https://t.me/perfectlystill)
+
 # ***Tonnel Marketplace API***
 
 This is a simple module that will help you interacting with Tonnel Marketplace API. Tested almost every API myself so you dont have to blindly test it.

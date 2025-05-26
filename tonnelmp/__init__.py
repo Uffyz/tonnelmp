@@ -16,6 +16,8 @@ from tonnelmp.marketapi import (
     myGifts,
     joinGiveaway,
     giveawayInfo,
+    filterStats,
+    filterStatsPretty,
     Gift
 )
 
@@ -40,5 +42,7 @@ __all__ = [
     "joinGiveaway",
     "giveawayInfo",
     "myGifts",
+    "filterStats",
+    "filterStatsPretty",
     "Gift"
 ]

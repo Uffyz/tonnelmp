@@ -15,7 +15,7 @@ def getGifts(
     sort: str = "price_asc",
     price_range: list | int = 0,
     asset: str = "TON",
-    user_auth: str = ""
+    authData: str = ""
 ) -> list:
     
     """
@@ -32,7 +32,7 @@ def getGifts(
         sort (str): The sorting method to apply to the results. Available options: "price_asc", "price_desc", "latest", "mint_time", "rarity", "gift_id_asc", "gift_id_desc"
         price_range (list | int): The price range to filter by. If a list is provided, it should contain two integers: the minimum and maximum price. Default is 0 (no filter).
         asset (str): The asset to filter by. Default is "TON". Available options: "TON", "USDT", "TONNEL"
-        user_auth (str): The user auth data required for authorization. Optional.
+        authData (str): The user auth data required for authorization. Optional.
     Returns:
         list: A list of dict objects with gifts details. 
     """
@@ -102,7 +102,7 @@ def getGifts(
         "page": page,
         "sort": sort_value,
         "ref": 0,
-        "user_auth": user_auth
+        "user_auth": authData
     }
 
     if isinstance(price_range, list) and len(price_range) == 2:
@@ -123,7 +123,7 @@ def myGifts(
     listed: bool = True,
     page: int = 1,
     limit: int = 30,
-    user_auth: str = ""
+    authData: str = ""
 ) -> list:
     
     """
@@ -139,13 +139,13 @@ def myGifts(
             Default is 1.
         limit: An integer indicating how many results to fetch per page.
             Default is 30.
-        user_auth: The user's auth data required for authorization.
+        authData: The user's auth data required for authorization.
 
     Returns:
         list: A list of dict objects with gifts details. 
     """
-    if not user_auth:
-        raise ValueError("user_auth is required")
+    if not authData:
+        raise ValueError("authData is required")
 
     URL = "https://gifts2.tonnel.network/api/pageGifts"
 
@@ -155,13 +155,13 @@ def myGifts(
         "Content-Type": "application/json",
     }
 
-    parsed = urllib.parse.parse_qs(user_auth)
+    parsed = urllib.parse.parse_qs(authData)
     user_data_json = parsed.get("user", ["{}"])[0]
     try:
         user_data = json.loads(urllib.parse.unquote(user_data_json))
         user_id = user_data["id"]
     except (json.JSONDecodeError, KeyError):
-        raise Exception("Invalid user_auth format — could not extract user ID")
+        raise Exception("Invalid authData format — could not extract user ID")
 
     if listed:
         sort_value = "{\"message_post_time\":-1,\"gift_id\":-1}"
@@ -188,7 +188,7 @@ def myGifts(
         "page": page,
         "sort": sort_value,
         "ref": 0,
-        "user_auth": user_auth
+        "user_auth": authData
     }
 
     response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110")
@@ -203,7 +203,7 @@ def myGifts(
 def listForSale(
     gift_id: int,
     price: int | float,
-    user_auth: str
+    authData: str
     ) -> dict:
     """
     [Requires authentication]
@@ -212,18 +212,18 @@ def listForSale(
     Args:
         gift_id (int): The Tonnel Gift ID of the gift (not gift_num / telegram gift number) to be listed for sale. Can be retrieved from myGifts or getGifts.
         price (int | float): The price at which the gift will be listed.
-        user_auth (str): The user's auth data required for authorization.
+        authData (str): The user's auth data required for authorization.
 
     Returns:
         dict: A dictionary containing the response data from the API. Either success or error.
 
     Raises:
-        ValueError: If user_auth is not provided.
+        ValueError: If authData is not provided.
         Exception: If the API request fails, with details about the status code and response text.
     """
 
-    if not user_auth:
-        raise ValueError("user_auth is required")
+    if not authData:
+        raise ValueError("authData is required")
 
     url = "https://gifts.coffin.meme/api/listForSale"
 
@@ -238,7 +238,7 @@ def listForSale(
     timestamp, wtf = generate_wtf()
 
     payload = {
-        "authData": user_auth,
+        "authData": authData,
         "gift_id": gift_id,
         "price": price,
         "asset": "TON",
@@ -257,7 +257,7 @@ def listForSale(
 
 def cancelSale(
     gift_id: int,
-    user_auth: str
+    authData: str
     ) -> dict:
     
     """
@@ -266,17 +266,17 @@ def cancelSale(
 
     Args:
         gift_id (int): The Tonnel Gift ID of the gift to cancel sale of (not gift_num / telegram gift number). Can be retrieved from myGifts or getGifts.
-        user_auth (str): The user's auth data required for authorization.
+        authData (str): The user's auth data required for authorization.
 
     Returns:
         dict: A dictionary containing the response data from the API. Either success or error.
 
     Raises:
-        ValueError: If user_auth is not provided.
+        ValueError: If authData is not provided.
         Exception: If the API request fails, with details about the status code and response text.
     """
-    if not user_auth:
-        raise ValueError("user_auth is required")
+    if not authData:
+        raise ValueError("authData is required")
 
     url = "https://gifts.coffin.meme/api/cancelSale"
 
@@ -291,7 +291,7 @@ def cancelSale(
     timestamp, wtf = generate_wtf()
 
     payload = {
-        "authData": user_auth,
+        "authData": authData,
         "gift_id": gift_id,
         "timestamp": timestamp,
         "wtf": wtf
@@ -403,7 +403,7 @@ def getAuctions(
     sort: str = "ending_soon",
     price_range: list | int = 0,
     asset: str = "TON",
-    user_auth: str = ""
+    authData: str = ""
 ) -> list:
     """
     Retrieves a list of auctions on the marketplace.
@@ -425,7 +425,7 @@ def getAuctions(
             minimum price and the maximum price will be set to infinity.
             Default is 0 (no filter).
         asset: A string indicating which asset to filter by. Default is "TON". Available options: "TON", "USDT", "TONNEL".
-        user_auth: The user auth data required for authorization. Optional.
+        authData: The user auth data required for authorization. Optional.
 
     Returns:
         list: A list of dict objects with auctions details.
@@ -483,7 +483,7 @@ def getAuctions(
         "page": page,
         "sort": sort_value,
         "ref": 0,
-        "user_auth": user_auth
+        "user_auth": authData
     }
 
     if isinstance(price_range, list) and len(price_range) == 2:
@@ -1130,9 +1130,108 @@ def joinGiveaway(
         "Content-Type": "application/json"
     }
 
-    response = requests.post(url, headers=headers, json=payload)
+    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
 
     if response.status_code != 200:
         raise Exception(f"joinGiveaway failed {response.status_code}: {response.text}")
 
     return response.json()
+
+def filterStats(authData: str) -> dict:
+    """
+    Retrieves filter stats from tonnel mp.
+
+    Args:
+        authData (str): The user's auth data required for authorization.
+
+    Returns:
+        dict: Ungrouped dict with all gifts and models with rarities + floors and stuff like that
+
+    Raises:
+        ValueError: If authData is not provided.
+        Exception: If the API request fails.
+    """
+    if not authData:
+        raise ValueError("authData is required")
+
+    url = "https://gifts2.tonnel.network/api/filterStats"
+
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+
+    payload = {
+        "authData": authData
+    }
+
+    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+
+    if response.status_code != 200:
+        raise Exception(f"get_filter_stats failed {response.status_code}: {response.text}")
+
+    return response.json()
+
+def filterStatsPretty(authData: str) -> dict:
+    """
+    Prettier version of filterStats.
+    You can get floorprice and howmany this way (example):
+    filterStatsPretty(authData)['data']['Toy Bear']['Wizard (1.5%)'] - will return this {'floorPrice': 19, 'howMany': 36}
+    Rarity and capitalization are required (!!!)
+    Also floorprice is raw.
+
+    Args:
+        authData (str): The user's auth data required for authorization.
+
+    Returns:
+        dict: Grouped dict with all gifts and models with rarities + floors etc
+
+    Raises:
+        ValueError: If authData is not provided.
+        Exception: If the API request fails.
+    """
+    if not authData:
+        raise ValueError("authData is required")
+
+    url = "https://gifts2.tonnel.network/api/filterStats"
+    headers = {
+        "Content-Type": "application/json",
+        "Accept": "application/json",
+    }
+
+    payload = {
+        "authData": authData
+    }
+
+    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+    
+    if response.status_code != 200:
+        raise Exception(f"get_filter_stats failed {response.status_code}: {response.text}")
+
+    res_json = response.json()
+    if res_json.get("status") != "success":
+        raise Exception("API returned an error: " + res_json.get("message", "Unknown error"))
+
+    raw_data = res_json.get("data", {})
+    structured_data = {}
+
+    for key, value in raw_data.items():
+        try:
+            gift_name, model = key.split("_", 1)
+        except ValueError:
+            # If somehow there's no "_" separator, skip or treat it differently
+            gift_name = key
+            model = "Unknown"
+
+        if gift_name not in structured_data:
+            structured_data[gift_name] = {}
+        
+        structured_data[gift_name][model] = {
+            "floorPrice": value.get("floorPrice"),
+            "howMany": value.get("howMany")
+        }
+
+    return {
+        "status": "success",
+        "data": structured_data
+    }

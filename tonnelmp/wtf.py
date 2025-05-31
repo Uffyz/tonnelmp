@@ -12,7 +12,7 @@ this is equivalent to cryptojs freeman used in the backend
 honestly i dont understand why did he add this cuz it basically encrypts the timestamp and thats it :D
 '''
 
-def evp_bytes_to_key(password, salt, key_len=32, iv_len=16):
+def evp(password, salt, key_len=32, iv_len=16):
     dtot = b''
     prev = b''
     while len(dtot) < (key_len + iv_len):
@@ -24,7 +24,7 @@ def generate_wtf():
     timestamp = str(int(time.time()))
 
     salt = get_random_bytes(8)
-    key, iv = evp_bytes_to_key(PASSWORD.encode('utf-8'), salt)
+    key, iv = evp(PASSWORD.encode('utf-8'), salt)
     cipher = AES.new(key, AES.MODE_CBC, iv)
     ct = cipher.encrypt(pad(timestamp.encode('utf-8'), AES.block_size))
     

@@ -88,7 +88,7 @@ Then navigate to Application tab -> Storage -> Local Storage -> https://market.t
 - Changed `user_auth` arg in most of the functions to `authData` because it was annoying me xd
 - Updated `joinGiveaway()` function to use chrome110 impersonation
 
-#### Version 1.1.0
+#### Version 1.1.1
 
 - Fixed `getGifts()` returning 0 len list for gifts `Durov's Cap` and `Jack-in-the-Box`
 - Added `premarket, telegramMarketplace, mintable, bundle` bool parameters to `getGifts()`

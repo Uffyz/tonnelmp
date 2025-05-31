@@ -88,6 +88,15 @@ Then navigate to Application tab -> Storage -> Local Storage -> https://market.t
 - Changed `user_auth` arg in most of the functions to `authData` because it was annoying me xd
 - Updated `joinGiveaway()` function to use chrome110 impersonation
 
+#### Version 1.1.0
+
+- Fixed `getGifts()` returning 0 len list for gifts `Durov's Cap` and `Jack-in-the-Box`
+- Added `premarket, telegramMarketplace, mintable, bundle` bool parameters to `getGifts()`
+- Added `giftData()` function
+- Updated `filterStatsPretty()` function.
+- Updated `Gift` class
+- *More info in updated documentation.*
+
 ## Some returns examples:
 
 #### Gift example:
@@ -125,29 +134,33 @@ print(getGifts(gift_name="toy bear", limit=1))
 ]
 ```
 
-gift_num - telegram gift number
+`gift_num` - telegram gift number
 
-customEmojiId - telegram custom emoji id
+`customEmojiId` - telegram custom emoji id
 
-gift_id - tonnel gift id
+`gift_id` - tonnel gift id
 
-name - gift name
+`name` - gift name
 
-model - gift model
+`model` - gift model
 
-asset - asset name
+`asset` - asset name
 
-symbol - symbol name
+`symbol` - symbol name
 
-backdrop - backdrop name
+`backdrop` - backdrop name
 
-price - price in TON without 10% fee.
+`price` - price in TON without 10% fee.
 
-status - status of the gift - forsale / auction (not sure about auction sorry)
+`status` - status of the gift - forsale / auction (not sure about auction sorry)
 
-auction - either None or auction data in dict
+`auction` - either None or auction data in dict
 
-export_at - time of when the gift has been placed for sale / auction
+`export_at` - time of when the gift will be mintable
+
+`bundleData` *[only for bundles]* - list of dicts / None
+
+`premarket` - Bool (true / false), whether gift is on premarket or not
 
 #### Balances example:
 
@@ -190,6 +203,8 @@ Wrapper for gift dictionary
 - .status
 - .asset
 - .auction
+- .premarket
+- .bundleData
 
 .. and more
 
@@ -212,10 +227,11 @@ Winter Wreath 23548 4848019 9.8
 #### getGifts()
 
 ```python
-getGifts(gift_name: str, model: str, backdrop: str, symbol: str, gift_num: int, page: int, limit: int, sort: str, price_range: list | int, asset: str, authData: str) -> list
+getGifts(gift_name: str, model: str, backdrop: str, symbol: str, gift_num: int, page: int, limit: int, sort: str, price_range: list | int, asset: str, premarket: bool = False, telegramMarketplace: bool = False, mintable: bool = False, bundle: bool = False, authData: str) -> list
 ```
 
 - Returns a list with dict objects containing gifts details.
+- Now supports `premarket`, `telegramMarketplace`, `mintable` gifts and bundles.
 - Available options:
   *sort (Default="price_asc"):* `"price_asc", "price_desc", "latest", "mint_time", "rarity", "gift_id_asc", "gift_id_desc"`
   *asset (Default="TON"):* `"TON", "USDT", "TONNEL"`
@@ -423,8 +439,20 @@ filterStatsPretty(authData: str) -> dict:
 
 - Prettier version of `filterStats()`.
 - Returns grouped dictionary of all the gifts and models.
-- Example: `filterStatsPretty(authData)['data']['Toy Bear']['Wizard (1.5%)']` - will return `{'floorPrice': int, 'howMany': int} `, floorprice is raw (without 10% fee added up). *(rarity and capitalization required !!!)*
+- Latest changes: now you dont need to capitalize letters in keys and you dont need rarity in model. Rarity is now included in every model key.
+- Example: `filterStatsPretty(authData)['data']['toy bear']['wizard']` - will return `{'floorPrice': int, 'howMany': int, 'rarity': float} `, floorprice is raw (without 10% fee added up). *(rarity and capitalization required !!!)*
+- Also now you can get `floorPrice` and `howMany` for gift without model. Example: `filterStatsPretty(authData)['data']['toy bear']['data']` - will return `{'floorPrice': int, 'howMany': int}`
 - **Requires: `authData`**
+
+#### giftData()
+
+```python
+giftData(gift_id: int | str authData: str) -> dict
+```
+
+- Retrieve gift data for gift with known `gift_id`
+- If `gift_id` starts with `-` , will return gift data + `bundleData`.
+- **Requires: `gift_id, authData`**
 
 ## Examples
 

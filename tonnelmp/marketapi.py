@@ -15,6 +15,10 @@ def getGifts(
     sort: str = "price_asc",
     price_range: list | int = 0,
     asset: str = "TON",
+    premarket: bool = False,
+    telegramMarketplace: bool = False,
+    mintable: bool = False,
+    bundle: bool = False,
     authData: str = ""
 ) -> list:
     
@@ -32,6 +36,10 @@ def getGifts(
         sort (str): The sorting method to apply to the results. Available options: "price_asc", "price_desc", "latest", "mint_time", "rarity", "gift_id_asc", "gift_id_desc"
         price_range (list | int): The price range to filter by. If a list is provided, it should contain two integers: the minimum and maximum price. Default is 0 (no filter).
         asset (str): The asset to filter by. Default is "TON". Available options: "TON", "USDT", "TONNEL"
+        premarket (bool): Show only premarket gifts. Default is False
+        telegramMarketplace (bool): Show gifts only from Telegram Marketplace. Default is False
+        mintable (bool): Show only mintable gifts. Default is False
+        bundle (bool): Show only bundle gifts. Default is False
         authData (str): The user auth data required for authorization. Optional.
     Returns:
         list: A list of dict objects with gifts details. 
@@ -65,15 +73,41 @@ def getGifts(
 
     filter_dict = {
         "price": {"$exists": True},
-        "refunded": {"$ne": True},
         "buyer": {"$exists": False},
-        "export_at": {"$exists": True},
         "asset": asset
     }
 
+    if premarket:
+        filter_dict["premarket"] = True
 
+    if telegramMarketplace:
+        filter_dict["telegramMarketplace"] = True
+        filter_dict["export_at"] = {"$exists": False}
+
+    if mintable:
+        now_iso = datetime.now(timezone.utc).isoformat(timespec='milliseconds').replace('+00:00', 'Z')
+        if "export_at" in filter_dict:
+            filter_dict["$and"] = [
+                {"export_at": filter_dict.pop("export_at")},
+                {"export_at": {"$lt": now_iso}}
+            ]
+        else:
+            filter_dict["export_at"] = {"$lt": now_iso}
+
+    if bundle:
+        filter_dict["gift_id"] = {"$lt": 0}
+
+    if not (premarket or telegramMarketplace or mintable or bundle):
+        filter_dict["refunded"] = {"$ne": True}
+        filter_dict["export_at"] = {"$exists": True}
+    
     if gift_name:
-        filter_dict["gift_name"] = gift_name.title()
+        if gift_name.lower() == "jack-in-the-box":
+            filter_dict["gift_name"] = "Jack-in-the-Box"
+        elif gift_name.lower() == "durov's cap":
+            filter_dict["gift_name"] = "Durov's Cap"
+        else:
+            filter_dict["gift_name"] = gift_name.title()
 
     if model:
         if "(" not in model:
@@ -743,6 +777,8 @@ class Gift:
         .export_at : Export time of the gift
         .customEmojiId : Custom emoji ID
         .auction : Auction details
+        .premarket : Premarket status (true / false)
+        .bundleData : Bundle details
     """
     def __init__(self, data: dict):
         self._data = data
@@ -786,6 +822,14 @@ class Gift:
     @property
     def export_at(self) -> str:
         return self._data.get("export_at")
+
+    @property
+    def premarket(self) -> bool:
+        return self._data.get("premarket")
+    
+    @property
+    def bundleData(self) -> dict:
+        return self._data.get("bundleData")
 
     def to_dict(self) -> dict:
         """Return the raw data as a dictionary."""
@@ -1168,28 +1212,31 @@ def filterStats(authData: str) -> dict:
     response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
 
     if response.status_code != 200:
-        raise Exception(f"get_filter_stats failed {response.status_code}: {response.text}")
+        raise Exception(f"filterStats failed {response.status_code}: {response.text}")
 
     return response.json()
 
+import re
+
 def filterStatsPretty(authData: str) -> dict:
     """
-    Prettier version of filterStats.
-    You can get floorprice and howmany this way (example):
-    filterStatsPretty(authData)['data']['Toy Bear']['Wizard (1.5%)'] - will return this {'floorPrice': 19, 'howMany': 36}
-    Rarity and capitalization are required (!!!)
-    Also floorprice is raw.
-
-    Args:
-        authData (str): The user's auth data required for authorization.
-
-    Returns:
-        dict: Grouped dict with all gifts and models with rarities + floors etc
-
-    Raises:
-        ValueError: If authData is not provided.
-        Exception: If the API request fails.
+    Prettier version of filterStats with lowercase keys + summary renamed to 'data'.
+    Output format:
+    {
+        "toy bear": {
+            "data": {
+                "floorPrice": 14.84,
+                "howMany": 2400
+            },
+            "wizard": {
+                "floorPrice": 19,
+                "howMany": 36,
+                "rarity": 1.5
+            }
+        }
+    }
     """
+
     if not authData:
         raise ValueError("authData is required")
 
@@ -1204,34 +1251,104 @@ def filterStatsPretty(authData: str) -> dict:
     }
 
     response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
-    
+
     if response.status_code != 200:
-        raise Exception(f"get_filter_stats failed {response.status_code}: {response.text}")
+        raise Exception(f"filterStatsPretty failed {response.status_code}: {response.text}")
 
-    res_json = response.json()
-    if res_json.get("status") != "success":
-        raise Exception("API returned an error: " + res_json.get("message", "Unknown error"))
+    r = response.json()
+    if r.get("status") != "success":
+        raise Exception("api error: " + r.get("message", "unknown error"))
 
-    raw_data = res_json.get("data", {})
-    structured_data = {}
+    rawdata = r.get("data", {})
+    data = {}
 
-    for key, value in raw_data.items():
+    for key, value in rawdata.items():
         try:
             gift_name, model = key.split("_", 1)
         except ValueError:
-            # If somehow there's no "_" separator, skip or treat it differently
             gift_name = key
             model = "Unknown"
 
-        if gift_name not in structured_data:
-            structured_data[gift_name] = {}
-        
-        structured_data[gift_name][model] = {
-            "floorPrice": value.get("floorPrice"),
-            "howMany": value.get("howMany")
+        match = re.match(r"^(.*?)\s*\(([\d.]+)%\)$", model)
+        if match:
+            model_name, rarity_str = match.groups()
+            rarity = float(rarity_str)
+        else:
+            model_name = model.strip()
+            rarity = None
+
+        gift_key = gift_name.strip().lower()
+        model_key = model_name.strip().lower()
+
+        floor = value.get("floorPrice")
+        how_many = value.get("howMany", 0)
+
+        if gift_key not in data:
+            data[gift_key] = {
+                "data": {
+                    "floorPrice": floor,
+                    "howMany": how_many
+                }
+            }
+        else:
+            currentFloor = data[gift_key]["data"].get("floorPrice")
+            if currentFloor is None or (floor is not None and floor < currentFloor):
+                data[gift_key]["data"]["floorPrice"] = floor
+
+            data[gift_key]["data"]["howMany"] += how_many
+
+        data[gift_key][model_key] = {
+            "floorPrice": floor,
+            "howMany": how_many,
+            "rarity": rarity
         }
 
     return {
         "status": "success",
-        "data": structured_data
+        "data": data
     }
+
+def giftData(
+        gift_id: int | str,
+        authData: str
+        ) -> dict:
+    """
+    [Requires authentication]
+    Retrieves data of the gift by gift_id from tonnel
+
+    Args:
+        gift_id (int | str): Tonnel gift_id of the gift.
+        authData (str): The user's auth data required for authorization.
+
+    Returns:
+        dict: A dict with gift data
+
+    Raises:
+        ValueError: If authData is not provided.
+        Exception: If the API request fails, with details about the status code and response text.
+    """
+
+    if not authData:
+        raise ValueError("authData is required")
+
+    url = f"https://gifts2.tonnel.network/api/giftData/{gift_id}"
+
+    headers = {
+        "Host": "gifts2.tonnel.network",
+        "Accept": "application/json, text/plain, */*",
+        "Content-Type": "application/json",
+    }
+
+    payload = {
+        "authData": authData,
+        "ref": ""
+    }
+
+    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+
+    if response.status_code == 429:
+        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"Request failed with status code {response.status_code}")
+
+    return response.json()

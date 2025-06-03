@@ -97,6 +97,10 @@ Then navigate to Application tab -> Storage -> Local Storage -> https://market.t
 - Updated `Gift` class
 - *More info in updated documentation.*
 
+#### Version 1.1.2
+
+- Fixed searching gifts with apostrophes in name/model
+
 ## Some returns examples:
 
 #### Gift example:

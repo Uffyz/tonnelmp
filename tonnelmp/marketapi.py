@@ -4,6 +4,14 @@ from curl_cffi import requests
 from tonnelmp.wtf import generate_wtf
 from datetime import datetime, timezone, timedelta
 
+def tonneltitle(text):
+    words = re.findall(r"\w+(?:'\w+)?", text)
+    for word in words:
+        if len(word) > 0:
+            cap = word[0].upper() + word[1:]
+            text = text.replace(word, cap, 1)
+    return text
+
 def getGifts(
     gift_name: str = None,
     model: str = None,
@@ -104,28 +112,27 @@ def getGifts(
     if gift_name:
         if gift_name.lower() == "jack-in-the-box":
             filter_dict["gift_name"] = "Jack-in-the-Box"
-        elif gift_name.lower() == "durov's cap":
-            filter_dict["gift_name"] = "Durov's Cap"
         else:
-            filter_dict["gift_name"] = gift_name.title()
+            filter_dict["gift_name"] = tonneltitle(gift_name.strip())
 
     if model:
         if "(" not in model:
-            filter_dict["model"] = {"$regex": f"^{model.strip().title()} \\("}
+            filter_dict["model"] = {"$regex": f"^{tonneltitle(model.strip())} \\("}
         else:
-            filter_dict["model"] = f"{model.title()}"
+            filter_dict["model"] = f"{tonneltitle(model.strip())}"
+            
 
     if backdrop:
         if "(" not in backdrop:
-            filter_dict["backdrop"] = {"$regex": f"^{backdrop.strip().title()} \\("}
+            filter_dict["backdrop"] = {"$regex": f"^{tonneltitle(backdrop.strip())} \\("}
         else:
-            filter_dict["backdrop"] = f"{backdrop.title()}"
+            filter_dict["backdrop"] = f"{tonneltitle(backdrop.strip())}"
 
     if symbol:
         if "(" not in symbol:
-            filter_dict["symbol"] = {"$regex": f"^{symbol.strip().title()} \\("}
+            filter_dict["symbol"] = {"$regex": f"^{tonneltitle(symbol.strip())} \\("}
         else:
-            filter_dict["symbol"] = f"{symbol.title()}"
+            filter_dict["symbol"] = f"{tonneltitle(symbol.strip())}"
 
     if gift_num is not None:
         filter_dict["gift_num"] = str(gift_num)
@@ -398,15 +405,15 @@ def saleHistory(
 
     if model:
         if "(" not in model:
-            filter_dict["model"] = {"$regex": f"^{model.strip().title()} \\("}
+            filter_dict["model"] = {"$regex": f"^{tonneltitle(model.strip())} \\("}
         else:
-            filter_dict["model"] = f"{model.title()}"
+            filter_dict["model"] = f"{tonneltitle(model.strip())}"
 
     if backdrop:
         if "(" not in backdrop:
-            filter_dict["backdrop"] = {"$regex": f"^{backdrop.strip().title()} \\("}
+            filter_dict["backdrop"] = {"$regex": f"^{tonneltitle(backdrop.strip())} \\("}
         else:
-            filter_dict["backdrop"] = f"{backdrop.title()}"
+            filter_dict["backdrop"] = f"{tonneltitle(backdrop.strip())}"
 
     payload = {
         "authData": authData,
@@ -492,21 +499,21 @@ def getAuctions(
 
     if model:
         if "(" not in model:
-            filter_dict["model"] = {"$regex": f"^{model.strip().title()} \\("}
+            filter_dict["model"] = {"$regex": f"^{tonneltitle(model.strip())} \\("}
         else:
-            filter_dict["model"] = f"{model.title()}"
+            filter_dict["model"] = f"{tonneltitle(model.strip())}"
 
     if backdrop:
         if "(" not in backdrop:
-            filter_dict["backdrop"] = {"$regex": f"^{backdrop.strip().title()} \\("}
+            filter_dict["backdrop"] = {"$regex": f"^{tonneltitle(backdrop.strip())} \\("}
         else:
-            filter_dict["backdrop"] = f"{backdrop.title()}"
+            filter_dict["backdrop"] = f"{tonneltitle(backdrop.strip())}"
 
     if symbol:
         if "(" not in symbol:
-            filter_dict["symbol"] = {"$regex": f"^{symbol.strip().title()} \\("}
+            filter_dict["symbol"] = {"$regex": f"^{tonneltitle(symbol.strip())} \\("}
         else:
-            filter_dict["symbol"] = f"{symbol.title()}"
+            filter_dict["symbol"] = f"{tonneltitle(symbol.strip())}"
 
     if gift_num:
         filter_dict["gift_num"] = str(gift_num)

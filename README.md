@@ -1,8 +1,10 @@
-[![pypi](https://img.shields.io/pypi/v/tonnelmp.svg)](https://pypi.org/project/tonnelmp/) [![stars](https://img.shields.io/github/stars/bleach-hub/tonnelmp?style=social)](https://github.com/bleach-hub/tonnelmp/stargazers) [![help](https://img.shields.io/badge/Telegram-@perfectlystill-blue?logo=telegram)](https://t.me/perfectlystill)
+[![pypi](https://img.shields.io/pypi/v/tonnelmp.svg)](https://pypi.org/project/tonnelmp/) [![stars](https://img.shields.io/github/stars/bleach-hub/tonnelmp?style=social)](https://github.com/bleach-hub/tonnelmp/stargazers) [![Me](https://img.shields.io/badge/Telegram-@perfectlystill-blue?logo=telegram)](https://t.me/perfectlystill) [![Updates & Devs chat](https://img.shields.io/badge/Telegram-@giftsdevs-blue?logo=telegram)](https://t.me/giftsdevs)
 
 # ***Tonnel Marketplace API***
 
 This is a simple module that will help you interacting with Tonnel Marketplace API. Tested almost every API myself so you dont have to blindly test it.
+
+*[Join our Telegram chat!](https://t.me/giftsdevschat)*
 
 #### Functionality
 
@@ -100,6 +102,12 @@ Then navigate to Application tab -> Storage -> Local Storage -> https://market.t
 #### Version 1.1.2
 
 - Fixed searching gifts with apostrophes in name/model
+
+#### Version 1.1.3
+
+- **Fixed 403 error**. *Thanks to boostNT and Alexander <3*
+- Please send your feedback if you still get an error. Will try to fix it ASAP.
+- Currently working on adding proxies support since freeman isn't really friendly about what you guys do :D
 
 ## Some returns examples:
 

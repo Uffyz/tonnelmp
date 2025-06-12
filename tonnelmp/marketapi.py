@@ -56,6 +56,9 @@ def getGifts(
     URL = "https://gifts2.tonnel.network/api/pageGifts"
 
     HEADERS = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Host": "gifts2.tonnel.network",
         "Accept": "application/json, text/plain, */*",
         "Content-Type": "application/json",
@@ -191,6 +194,9 @@ def myGifts(
     URL = "https://gifts2.tonnel.network/api/pageGifts"
 
     HEADERS = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Host": "gifts2.tonnel.network",
         "Accept": "application/json, text/plain, */*",
         "Content-Type": "application/json",
@@ -269,6 +275,9 @@ def listForSale(
     url = "https://gifts.coffin.meme/api/listForSale"
 
     headers = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
         "Host": "gifts.coffin.meme",
         "Accept": "*/*",
@@ -322,6 +331,9 @@ def cancelSale(
     url = "https://gifts.coffin.meme/api/cancelSale"
 
     headers = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
         "Host": "gifts.coffin.meme",
         "Accept": "*/*",
@@ -383,6 +395,9 @@ def saleHistory(
     URL = "https://gifts2.tonnel.network/api/saleHistory"
 
     HEADERS = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Host": "gifts2.tonnel.network",
         "Accept": "application/json, text/plain, */*",
         "Content-Type": "application/json",
@@ -474,6 +489,9 @@ def getAuctions(
     URL = "https://gifts2.tonnel.network/api/pageGifts"
 
     HEADERS = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Host": "gifts2.tonnel.network",
         "Accept": "application/json, text/plain, */*",
         "Content-Type": "application/json",
@@ -592,6 +610,9 @@ def createAuction(
 
     url = "https://gifts.coffin.meme/api/auction/create"
     headers = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Content-Type" : "application/json",
         "Host"         : "gifts.coffin.meme",
         "Accept"       : "*/*",
@@ -633,6 +654,9 @@ def cancelAuction(
     
     url = "https://gifts.coffin.meme/api/auction/cancel"
     headers = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
         "Host": "gifts.coffin.meme",
         "Accept": "*/*",
@@ -688,12 +712,14 @@ def buyGift(
     url = f"https://gifts.coffin.meme/api/buyGift/{gift_id}"
     
     headers = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
         "Host": "gifts.coffin.meme",
         "Accept": "*/*",
         "Accept-Encoding": "gzip, deflate, br",
         "Connection": "keep-alive",
-        "User-Agent": "Mozilla/5.0"
     }
 
     timestamp, wtf = generate_wtf()
@@ -746,12 +772,14 @@ def info(
     url = "https://gifts2.tonnel.network/api/balance/info"
 
     headers = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
         "Host": "gifts2.tonnel.network",
         "Accept": "*/*",
         "Accept-Encoding": "gzip, deflate, br",
         "Connection": "keep-alive",
-        "User-Agent": "Mozilla/5.0"
     }
 
     payload = {
@@ -875,8 +903,11 @@ def withdraw(
     url = "https://gifts.coffin.meme/api/balance/withdraw"
 
     headers = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0"
+        "Host": "gifts.coffin.meme"
     }
 
     payload = {
@@ -917,8 +948,11 @@ def returnGift(gift_id: int, authData: str) -> dict:
     url = "https://gifts.coffin.meme/api/returnGift"
 
     headers = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0"
+        "Host": "gifts.coffin.meme"
     }
 
     payload = {
@@ -959,8 +993,11 @@ def placeBid(auction_id: str, amount: int | float, authData: str, asset: str = "
     url = "https://gifts.coffin.meme/api/auction/bid"
 
     headers = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0"
+        "Host": "gifts.coffin.meme"
     }
 
     payload = {
@@ -1001,8 +1038,11 @@ def switchTransfer(authData: str, transferGift: bool) -> dict:
     url = "https://gifts.coffin.meme/api/user/switchTransfer"
 
     headers = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0"
+        "Host": "gifts.coffin.meme"
     }
 
     payload = {
@@ -1046,8 +1086,11 @@ def mintGift(authData: str, wallet: str, gift_id: int) -> dict:
     url = "https://gifts.coffin.meme/api/mint/start"
 
     headers = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0"
+        "Host": "gifts.coffin.meme"
     }
 
     payload = {
@@ -1089,8 +1132,11 @@ def unlockListing(authData: str, gift_id: int) -> dict:
     url = "https://gifts.coffin.meme/api/unlock"
 
     headers = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0"
+        "Host": "gifts.coffin.meme"
     }
 
     payload = {
@@ -1129,8 +1175,11 @@ def giveawayInfo(giveaway_id: str, authData: str) -> dict:
     url = "https://gifts2.tonnel.network/api/giveaway/info"
 
     headers = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
-        "User-Agent": "Mozilla/5.0"
+        "Host": "gifts2.tonnel.network"
     }
 
     payload = {
@@ -1178,7 +1227,11 @@ def joinGiveaway(
 
     url = "https://gifts.coffin.meme/api/giveaway/join"
     headers = {
-        "Content-Type": "application/json"
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
+        "Content-Type": "application/json",
+        "Host": "gifts.coffin.meme"
     }
 
     response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
@@ -1208,8 +1261,12 @@ def filterStats(authData: str) -> dict:
     url = "https://gifts2.tonnel.network/api/filterStats"
 
     headers = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
         "Accept": "application/json",
+        "Host": "gifts2.tonnel.network"
     }
 
     payload = {
@@ -1249,8 +1306,12 @@ def filterStatsPretty(authData: str) -> dict:
 
     url = "https://gifts2.tonnel.network/api/filterStats"
     headers = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
         "Accept": "application/json",
+        "Host": "gifts2.tonnel.network"
     }
 
     payload = {
@@ -1341,6 +1402,9 @@ def giftData(
     url = f"https://gifts2.tonnel.network/api/giftData/{gift_id}"
 
     headers = {
+        "Origin": "https://market.tonnel.network",
+        "Referer": "https://market.tonnel.network/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Host": "gifts2.tonnel.network",
         "Accept": "application/json, text/plain, */*",
         "Content-Type": "application/json",

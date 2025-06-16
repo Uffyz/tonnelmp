@@ -418,6 +418,12 @@ def saleHistory(
 
     filter_dict = {}
 
+    if gift_name:
+        if gift_name.lower() == "jack-in-the-box":
+            filter_dict["gift_name"] = "Jack-in-the-Box"
+        else:
+            filter_dict["gift_name"] = tonneltitle(gift_name.strip())
+
     if model:
         if "(" not in model:
             filter_dict["model"] = {"$regex": f"^{tonneltitle(model.strip())} \\("}
@@ -514,6 +520,11 @@ def getAuctions(
         "status": "active",
         "asset": asset
     }
+    if gift_name:
+        if gift_name.lower() == "jack-in-the-box":
+            filter_dict["gift_name"] = "Jack-in-the-Box"
+        else:
+            filter_dict["gift_name"] = tonneltitle(gift_name.strip())
 
     if model:
         if "(" not in model:
@@ -1304,14 +1315,14 @@ def filterStatsPretty(authData: str) -> dict:
     if not authData:
         raise ValueError("authData is required")
 
-    url = "https://gifts2.tonnel.network/api/filterStats"
+    url = "https://gifts3.tonnel.network/api/filterStats"
     headers = {
         "Origin": "https://market.tonnel.network",
         "Referer": "https://market.tonnel.network/",
         "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
         "Content-Type": "application/json",
         "Accept": "application/json",
-        "Host": "gifts2.tonnel.network"
+        "Host": "gifts3.tonnel.network"
     }
 
     payload = {

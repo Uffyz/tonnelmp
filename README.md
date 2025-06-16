@@ -109,6 +109,10 @@ Then navigate to Application tab -> Storage -> Local Storage -> https://market.t
 - Please send your feedback if you still get an error. Will try to fix it ASAP.
 - Currently working on adding proxies support since freeman isn't really friendly about what you guys do :D
 
+#### Version 1.1.4
+
+- Fixed `gift_name` not adding to filters in `saleHistory()` and `getAuctions()`
+
 ## Some returns examples:
 
 #### Gift example:

@@ -3,6 +3,25 @@ import urllib.parse
 from curl_cffi import requests
 from tonnelmp.wtf import generate_wtf
 from datetime import datetime, timezone, timedelta
+from fake_useragent import UserAgent
+
+HEADERS = {
+    "authority": "",
+    "accept": "*/*",
+    "accept-encoding": "gzip, deflate, br, zstd",
+    "accept-language": "ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
+    "content-type": "application/json",
+    "origin": "https://market.tonnel.network",
+    "priority": "u=1, i",
+    "referer": "https://market.tonnel.network/",
+    "sec-ch-ua": '"Google Chrome";v="137", "Chromium";v="137", "Not/A)Brand";v="24"',
+    "sec-ch-ua-mobile": "?0",
+    "sec-ch-ua-platform": '"Windows"',
+    "sec-fetch-dest": "empty",
+    "sec-fetch-mode": "cors",
+    "sec-fetch-site": "same-site",
+    "user-agent": "",
+    }
 
 def tonneltitle(text):
     words = re.findall(r"\w+(?:'\w+)?", text)
@@ -27,7 +46,8 @@ def getGifts(
     telegramMarketplace: bool = False,
     mintable: bool = False,
     bundle: bool = False,
-    authData: str = ""
+    authData: str = "",
+    proxies: dict = None
 ) -> list:
     
     """
@@ -55,14 +75,11 @@ def getGifts(
 
     URL = "https://gifts2.tonnel.network/api/pageGifts"
 
-    HEADERS = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Host": "gifts2.tonnel.network",
-        "Accept": "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts2.tonnel.network"
+    HEADERS["user-agent"] = user_agent
 
     SORTS = {
         "price_asc": "{\"price\":1,\"gift_id\":-1}",
@@ -80,7 +97,7 @@ def getGifts(
     try:
         sort_value = SORTS[sort]
     except KeyError:
-        raise Exception("Invalid sort argument. Available sorts: " + str(list(SORTS.keys())))
+        raise Exception("tonnelmp: getGifts(): Invalid sort argument. Available sorts: " + str(list(SORTS.keys())))
 
     filter_dict = {
         "price": {"$exists": True},
@@ -154,12 +171,15 @@ def getGifts(
     else:
         payload["price_range"] = 0
 
-    response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110")
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: getGifts(): Request failed with error: {e}")
 
-    if response.status_code == 429:
-        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    if response.status_code in [403, 429]:
+        raise Exception(f"tonnelmp: getGifts(): Request failed with status code {response.status_code} (Likely CloudFlare)")
     elif response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
+        raise Exception(f"tonnelmp: getGifts(): Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -167,7 +187,8 @@ def myGifts(
     listed: bool = True,
     page: int = 1,
     limit: int = 30,
-    authData: str = ""
+    authData: str = "",
+    proxies: dict | None = None
 ) -> list:
     
     """
@@ -189,18 +210,15 @@ def myGifts(
         list: A list of dict objects with gifts details. 
     """
     if not authData:
-        raise ValueError("authData is required")
+        raise ValueError("tonnelmp: myGifts(): authData is required")
 
     URL = "https://gifts2.tonnel.network/api/pageGifts"
 
-    HEADERS = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Host": "gifts2.tonnel.network",
-        "Accept": "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts2.tonnel.network"
+    HEADERS["user-agent"] = user_agent
 
     parsed = urllib.parse.parse_qs(authData)
     user_data_json = parsed.get("user", ["{}"])[0]
@@ -208,7 +226,7 @@ def myGifts(
         user_data = json.loads(urllib.parse.unquote(user_data_json))
         user_id = user_data["id"]
     except (json.JSONDecodeError, KeyError):
-        raise Exception("Invalid authData format — could not extract user ID")
+        raise Exception("tonnelmp: myGifts(): Invalid authData format — could not extract user ID")
 
     if listed:
         sort_value = "{\"message_post_time\":-1,\"gift_id\":-1}"
@@ -237,20 +255,23 @@ def myGifts(
         "ref": 0,
         "user_auth": authData
     }
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: myGifts(): Request failed with error: {e}")
 
-    response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110")
-
-    if response.status_code == 429:
-        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    if response.status_code in [403, 429]:
+        raise Exception(f"tonnelmp: myGifts(): Request failed with status code {response.status_code} (Likely CloudFlare)")
     elif response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
+        raise Exception(f"tonnelmp: myGifts(): Request failed with status code {response.status_code}")
 
     return response.json()
 
 def listForSale(
     gift_id: int,
     price: int | float,
-    authData: str
+    authData: str,
+    proxies: dict | None = None
     ) -> dict:
     """
     [Requires authentication]
@@ -270,20 +291,15 @@ def listForSale(
     """
 
     if not authData:
-        raise ValueError("authData is required")
+        raise ValueError("tonnelmp: listForSale(): authData is required")
 
-    url = "https://gifts.coffin.meme/api/listForSale"
+    URL = "https://gifts.coffin.meme/api/listForSale"
 
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "Host": "gifts.coffin.meme",
-        "Accept": "*/*",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Connection": "keep-alive"
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts.coffin.meme"
+    HEADERS["user-agent"] = user_agent
 
     timestamp, wtf = generate_wtf()
 
@@ -295,19 +311,22 @@ def listForSale(
         "timestamp": timestamp,
         "wtf": wtf
     }
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: listForSale(): Request failed with error: {e}")
 
-    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
-
-    if response.status_code == 429:
-        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    if response.status_code in [403, 429]:
+        raise Exception(f"tonnelmp: listForSale(): Request failed with status code {response.status_code} (Likely CloudFlare)")
     elif response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
+        raise Exception(f"tonnelmp: listForSale(): Request failed with status code {response.status_code}")
 
     return response.json()
 
 def cancelSale(
     gift_id: int,
-    authData: str
+    authData: str,
+    proxies: dict | None = None
     ) -> dict:
     
     """
@@ -326,20 +345,15 @@ def cancelSale(
         Exception: If the API request fails, with details about the status code and response text.
     """
     if not authData:
-        raise ValueError("authData is required")
+        raise ValueError("tonnelmp: cancelSale(): authData is required")
 
-    url = "https://gifts.coffin.meme/api/cancelSale"
+    URL = "https://gifts.coffin.meme/api/cancelSale"
 
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "Host": "gifts.coffin.meme",
-        "Accept": "*/*",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Connection": "keep-alive"
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts.coffin.meme"
+    HEADERS["user-agent"] = user_agent
 
     timestamp, wtf = generate_wtf()
 
@@ -349,13 +363,15 @@ def cancelSale(
         "timestamp": timestamp,
         "wtf": wtf
     }
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: cancelSale(): Request failed with error: {e}")
 
-    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
-
-    if response.status_code == 429:
-        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    if response.status_code in [403, 429]:
+        raise Exception(f"tonnelmp: cancelSale(): Request failed with status code {response.status_code} (Likely CloudFlare)")
     elif response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
+        raise Exception(f"tonnelmp: cancelSale(): Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -367,7 +383,8 @@ def saleHistory(
     gift_name: str = None,
     model: str = None,
     backdrop: str = None,
-    sort: str = "latest"
+    sort: str = "latest",
+    proxies: dict | None = None
 ) -> list:
     
     """
@@ -394,14 +411,11 @@ def saleHistory(
     
     URL = "https://gifts2.tonnel.network/api/saleHistory"
 
-    HEADERS = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Host": "gifts2.tonnel.network",
-        "Accept": "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts2.tonnel.network"
+    HEADERS["user-agent"] = user_agent
 
     SORTS = {
         "latest": "{\"timestamp\":-1,\"gift_id\":-1}",
@@ -414,7 +428,7 @@ def saleHistory(
     try:
         sort_value = SORTS[sort]
     except KeyError:
-        raise Exception("Invalid sort argument. Available sorts: " + str(list(SORTS.keys())))
+        raise Exception("tonnelmp: saleHistory(): Invalid sort argument. Available sorts: " + str(list(SORTS.keys())))
 
     filter_dict = {}
 
@@ -444,13 +458,15 @@ def saleHistory(
         "filter": filter_dict,
         "sort": json.loads(sort_value)
     }
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: saleHistory(): Request failed with exception {e}")
 
-    response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110")
-
-    if response.status_code == 429:
-        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    if response.status_code in [403, 429]:
+        raise Exception(f"tonnelmp: saleHistory(): Request failed with status code {response.status_code} (Likely CloudFlare)")
     elif response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
+        raise Exception(f"tonnelmp: saleHistory(): equest failed with status code {response.status_code}")
 
     return response.json()
 
@@ -465,7 +481,8 @@ def getAuctions(
     sort: str = "ending_soon",
     price_range: list | int = 0,
     asset: str = "TON",
-    authData: str = ""
+    authData: str = "",
+    proxies: dict | None = None
 ) -> list:
     """
     Retrieves a list of auctions on the marketplace.
@@ -494,14 +511,11 @@ def getAuctions(
     """
     URL = "https://gifts2.tonnel.network/api/pageGifts"
 
-    HEADERS = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Host": "gifts2.tonnel.network",
-        "Accept": "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts2.tonnel.network"
+    HEADERS["user-agent"] = user_agent
 
     SORTS = {
         "ending_soon": "{\"auctionEndTime\":1,\"gift_id\":-1}",
@@ -513,7 +527,7 @@ def getAuctions(
     try:
         sort_value = SORTS[sort]
     except KeyError:
-        raise Exception("Invalid sort argument. Available sorts: " + str(list(SORTS.keys())))
+        raise Exception("tonnelmp: getAuctions(): Invalid sort argument. Available sorts: " + str(list(SORTS.keys())))
 
     filter_dict = {
         "auction_id": {"$exists": True},
@@ -560,13 +574,15 @@ def getAuctions(
         payload["price_range"] = price_range
     else:
         payload["price_range"] = 0
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: getAuctions(): Request failed with error: {e}")
 
-    response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110")
-
-    if response.status_code == 429:
-        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    if response.status_code in [403, 429]:
+        raise Exception(f"tonnelmp: getAuctions(): Request failed with status code {response.status_code} (Likely CloudFlare)")
     elif response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
+        raise Exception(f"tonnelmp: getAuctions(): Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -579,6 +595,7 @@ def createAuction(
     starting_bid: int | float,
     authData: str,
     duration: int = 1,
+    proxies: dict | None = None
 ) -> dict:
     
     """
@@ -606,7 +623,7 @@ def createAuction(
 
     if duration not in ALLOWED_DURATIONS:
         raise ValueError(
-            f"duration_hours must be one of {sorted(ALLOWED_DURATIONS)} "
+            f"tonnelmp: createAuction(): duration_hours must be one of {sorted(ALLOWED_DURATIONS)} "
             f"(got {duration})"
         )
 
@@ -619,31 +636,30 @@ def createAuction(
         "auctionEndTime": auction_end_time
     }
 
-    url = "https://gifts.coffin.meme/api/auction/create"
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Content-Type" : "application/json",
-        "Host"         : "gifts.coffin.meme",
-        "Accept"       : "*/*",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Connection"   : "keep-alive"
-    }
+    URL = "https://gifts.coffin.meme/api/auction/create"
 
-    response = requests.post(url, headers=headers, json=payload,
-                         impersonate="chrome110")
+    ua = UserAgent()
+    user_agent = ua.random
 
-    if response.status_code == 429:
-        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    HEADERS["authority"] = "gifts.coffin.meme"
+    HEADERS["user-agent"] = user_agent
+
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: createAuction(): Request failed with error: {e}")
+
+    if response.status_code in [403, 429]:
+        raise Exception(f"tonnelmp: createAuction(): Request failed with status code {response.status_code} (Likely CloudFlare)")
     elif response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
+        raise Exception(f"tonnelmp: createAuction(): Request failed with status code {response.status_code}")
 
     return response.json()
 
 def cancelAuction(
     auction_id: str,
-    authData: str
+    authData: str,
+    proxies: dict | None = None
     ) -> dict:
     """
     [Requires authentication]
@@ -661,31 +677,30 @@ def cancelAuction(
         Exception: If the API request fails, with details about the status code and response text.
     """
     if not authData:
-        raise ValueError("authData is required")
+        raise ValueError("tonnelmp: cancelAuction(): authData is required")
     
-    url = "https://gifts.coffin.meme/api/auction/cancel"
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "Host": "gifts.coffin.meme",
-        "Accept": "*/*",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Connection": "keep-alive"
-    }
+    URL = "https://gifts.coffin.meme/api/auction/cancel"
+    
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts.coffin.meme"
+    HEADERS["user-agent"] = user_agent
 
     payload = {
         "authData": authData,
         "auction_id": auction_id
     }
 
-    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: cancelAuction(): Request failed with error: {e}")
 
-    if response.status_code == 429:
-        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    if response.status_code in [403, 429]:
+        raise Exception(f"tonnelmp: cancelAuction(): Request failed with status code {response.status_code} (Likely CloudFlare)")
     elif response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
+        raise Exception(f"tonnelmp: cancelAuction(): Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -695,7 +710,8 @@ def buyGift(
     authData: str,
     receiver: str = None,
     anonymously: bool = False,
-    showPrice: bool = False
+    showPrice: bool = False,
+    proxies: dict | None = None
 ) -> dict:
     """
     [Requires authentication]
@@ -718,20 +734,15 @@ def buyGift(
     """
 
     if not authData:
-        raise ValueError("authData is required")
+        raise ValueError("tonnelmp: buyGift(): authData is required")
 
-    url = f"https://gifts.coffin.meme/api/buyGift/{gift_id}"
+    URL = f"https://gifts.coffin.meme/api/buyGift/{gift_id}"
     
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "Host": "gifts.coffin.meme",
-        "Accept": "*/*",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Connection": "keep-alive",
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts.coffin.meme"
+    HEADERS["user-agent"] = user_agent
 
     timestamp, wtf = generate_wtf()
 
@@ -749,19 +760,22 @@ def buyGift(
             "anonymously": anonymously,
             "showPrice": showPrice
         })
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: buyGift(): Request failed with error: {e}")
 
-    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
-
-    if response.status_code == 429:
-        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    if response.status_code in [403, 429]:
+        raise Exception(f"tonnelmp: buyGift(): Request failed with status code {response.status_code} (Likely CloudFlare)")
     elif response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
+        raise Exception(f"tonnelmp: buyGift(): Request failed with status code {response.status_code}")
 
     return response.json()
 
 
 def info(
-    authData: str
+    authData: str,
+    proxies: dict | None = None
     ) -> dict:
     """
     [Requires authentication]
@@ -778,31 +792,29 @@ def info(
         Exception: If the API request fails, with details about the status code and response text.
     """
     if not authData:
-        raise ValueError("authdata is required")
+        raise ValueError("tonnelmp: info(): authdata is required")
 
-    url = "https://gifts2.tonnel.network/api/balance/info"
+    URL = "https://gifts2.tonnel.network/api/balance/info"
 
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "Host": "gifts2.tonnel.network",
-        "Accept": "*/*",
-        "Accept-Encoding": "gzip, deflate, br",
-        "Connection": "keep-alive",
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts2.tonnel.network"
+    HEADERS["user-agent"] = user_agent
 
     payload = {
         "authData": authData
     }
 
-    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: info(): Request failed with error: {e}")
 
-    if response.status_code == 429:
-        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    if response.status_code in [403, 429]:
+        raise Exception(f"tonnelmp: info(): Request failed with status code {response.status_code} (Likely CloudFlare)")
     elif response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
+        raise Exception(f"tonnelmp: info(): Request failed with status code {response.status_code}")
 
     return response.json()
 
@@ -885,7 +897,8 @@ def withdraw(
     wallet: str,
     authData: str,
     amount: int | float,
-    asset: str = "TON"
+    asset: str = "TON",
+    proxies: dict | None = None
 ) -> dict:
     """
     [Requires authentication]
@@ -906,20 +919,18 @@ def withdraw(
     """
 
     if not wallet or not authData or not amount:
-        raise ValueError("wallet, authData, and amount are required fields")
+        raise ValueError("tonnelmp: withdraw(): wallet, authData, and amount are required fields")
 
     if asset not in {"TON", "USDT", "TONNEL"}:
-        raise ValueError("Invalid asset type. Must be 'TON', 'USDT', or 'TONNEL'.")
+        raise ValueError("tonnelmp: withdraw(): Invalid asset type. Must be 'TON', 'USDT', or 'TONNEL'.")
 
-    url = "https://gifts.coffin.meme/api/balance/withdraw"
+    URL = "https://gifts.coffin.meme/api/balance/withdraw"
 
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "Host": "gifts.coffin.meme"
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts.coffin.meme"
+    HEADERS["user-agent"] = user_agent
 
     payload = {
         "wallet": wallet,
@@ -927,17 +938,19 @@ def withdraw(
         "amount": float(amount),
         "asset": asset
     }
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=15, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: withdraw(): Request failed with error: {e}")
 
-    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
-
-    if response.status_code == 429:
-        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    if response.status_code in [403, 429]:
+        raise Exception(f"tonnelmp: withdraw(): Request failed with status code {response.status_code} (Likely CloudFlare)")
     elif response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
+        raise Exception(f"tonnelmp: withdraw(): Request failed with status code {response.status_code}")
 
     return response.json()
 
-def returnGift(gift_id: int, authData: str) -> dict:
+def returnGift(gift_id: int, authData: str, proxies: dict | None = None) -> dict:
     """
     [Requires authentication]
     Returns a purchased gift back to the Tonnel Marketplace.
@@ -954,33 +967,34 @@ def returnGift(gift_id: int, authData: str) -> dict:
         Exception: If the API request fails with a non-200 status.
     """
     if not gift_id or not authData:
-        raise ValueError("Both gift_id and authData are required.")
+        raise ValueError("tonnelmp: returnGift(): Both gift_id and authData are required.")
 
-    url = "https://gifts.coffin.meme/api/returnGift"
+    URL = "https://gifts.coffin.meme/api/returnGift"
 
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "Host": "gifts.coffin.meme"
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts.coffin.meme"
+    HEADERS["user-agent"] = user_agent
 
     payload = {
         "gift_id": gift_id,
         "authData": authData
     }
 
-    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: returnGift(): Request failed with error: {e}")
 
     if response.status_code == 429:
-        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+        raise Exception(f"tonnelmp: returnGift(): Request failed with status code {response.status_code} (Likely CloudFlare)")
     elif response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
+        raise Exception(f"tonnelmp: returnGift(): Request failed with status code {response.status_code}")
 
     return response.json()
 
-def placeBid(auction_id: str, amount: int | float, authData: str, asset: str = "TON") -> dict:
+def placeBid(auction_id: str, amount: int | float, authData: str, asset: str = "TON", proxies: dict | None = None) -> dict:
     """
     [Requires authentication]
     Places a bid on an auctioned gift in the Tonnel Marketplace.
@@ -999,17 +1013,15 @@ def placeBid(auction_id: str, amount: int | float, authData: str, asset: str = "
         Exception: If the API request fails or returns a non-200 status.
     """
     if not auction_id or not amount or not authData:
-        raise ValueError("All arguments (auction_id, amount, authData) are required.")
+        raise ValueError("tonnelmp: placeBid(): All arguments (auction_id, amount, authData) are required.")
 
-    url = "https://gifts.coffin.meme/api/auction/bid"
+    URL = "https://gifts.coffin.meme/api/auction/bid"
 
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "Host": "gifts.coffin.meme"
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts.coffin.meme"
+    HEADERS["user-agent"] = user_agent
 
     payload = {
         "authData": authData,
@@ -1017,17 +1029,19 @@ def placeBid(auction_id: str, amount: int | float, authData: str, asset: str = "
         "amount": float(amount),
         "asset": asset
     }
-
-    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: placeBid(): Request failed with error: {e}")
 
     if response.status_code == 429:
-        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+        raise Exception(f"tonnelmp: placeBid(): Request failed with status code {response.status_code} (Likely CloudFlare)")
     elif response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
+        raise Exception(f"tonnelmp: placeBid(): Request failed with status code {response.status_code}")
 
     return response.json()
 
-def switchTransfer(authData: str, transferGift: bool) -> dict:
+def switchTransfer(authData: str, transferGift: bool, proxies: dict | None = None) -> dict:
     """
     [Requires authentication]
     Toggles internal gift transfer mode in the Tonnel Marketplace.
@@ -1044,33 +1058,33 @@ def switchTransfer(authData: str, transferGift: bool) -> dict:
         Exception: If the API request fails.
     """
     if not authData:
-        raise ValueError("authData is required.")
+        raise ValueError("tonnelmp: switchTransfer(): authData is required.")
 
-    url = "https://gifts.coffin.meme/api/user/switchTransfer"
+    URL = "https://gifts.coffin.meme/api/user/switchTransfer"
 
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "Host": "gifts.coffin.meme"
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts.coffin.meme"
+    HEADERS["user-agent"] = user_agent
 
     payload = {
         "transferGift": transferGift,
         "authData": authData
     }
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: switchTransfer(): Request failed with error: {e}")
 
-    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
-
-    if response.status_code == 429:
-        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    if response.status_code in [403, 429]:
+        raise Exception(f"tonnelmp: switchTransfer(): Request failed with status code {response.status_code} (Likely CloudFlare)")
     elif response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
+        raise Exception(f"tonnelmp: switchTransfer(): Request failed with status code {response.status_code}")
 
     return response.json()
 
-def mintGift(authData: str, wallet: str, gift_id: int) -> dict:
+def mintGift(authData: str, wallet: str, gift_id: int, proxies: dict | None = None) -> dict:
     """
     [Requires authentication]
     Initiates the minting process of a gift to the specified wallet.
@@ -1088,21 +1102,19 @@ def mintGift(authData: str, wallet: str, gift_id: int) -> dict:
         Exception: If the API request fails.
     """
     if not authData:
-        raise ValueError("authData is required.")
+        raise ValueError("tonnelmp: mintGift(): authData is required.")
     if not wallet:
-        raise ValueError("wallet is required.")
+        raise ValueError("tonnelmp: mintGift(): wallet is required.")
     if not gift_id:
-        raise ValueError("gift_id is required.")
+        raise ValueError("tonnelmp: mintGift(): gift_id is required.")
 
-    url = "https://gifts.coffin.meme/api/mint/start"
+    URL = "https://gifts.coffin.meme/api/mint/start"
 
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "Host": "gifts.coffin.meme"
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts.coffin.meme"
+    HEADERS["user-agent"] = user_agent
 
     payload = {
         "authData": authData,
@@ -1110,16 +1122,19 @@ def mintGift(authData: str, wallet: str, gift_id: int) -> dict:
         "gift_id": gift_id
     }
 
-    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
-
-    if response.status_code == 429:
-        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=15, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: mintGift(): Request failed with error: {e}")
+    
+    if response.status_code in [403, 429]:
+        raise Exception(f"tonnelmp: mintGift(): Request failed with status code {response.status_code} (Likely CloudFlare)")
     elif response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
+        raise Exception(f"tonnelmp: mintGift(): Request failed with status code {response.status_code}")
 
     return response.json()
 
-def unlockListing(authData: str, gift_id: int) -> dict:
+def unlockListing(authData: str, gift_id: int, proxies: dict | None = None) -> dict:
     """
     [Requires authentication]
     Unlocks a listing on the Tonnel Marketplace, allowing it to be relisted or managed.
@@ -1136,33 +1151,36 @@ def unlockListing(authData: str, gift_id: int) -> dict:
         Exception: If the API request fails.
     """
     if not authData:
-        raise ValueError("authData is required.")
+        raise ValueError("tonnelmp: unlockListing(): authData is required.")
     if not gift_id:
-        raise ValueError("sale_id is required.")
+        raise ValueError("tonnelmp: unlockListing(): sale_id is required.")
 
-    url = "https://gifts.coffin.meme/api/unlock"
+    URL = "https://gifts.coffin.meme/api/unlock"
 
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "Host": "gifts.coffin.meme"
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts.coffin.meme"
+    HEADERS["user-agent"] = user_agent
 
     payload = {
         "authData": authData,
         "sale_id": gift_id
     }
 
-    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
-
-    if response.status_code != 200:
-        raise Exception(f"unlockListing failed {response.status_code}: {response.text}")
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: unlockListing(): Request failed: {e}")
+    
+    if response.status_code in [403, 429]:
+        raise Exception(f"tonnelmp: unlockListing(): Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"tonnelmp: unlockListing(): Request failed with status code {response.status_code}")
 
     return response.json()
 
-def giveawayInfo(giveaway_id: str, authData: str) -> dict:
+def giveawayInfo(giveaway_id: str, authData: str, proxies: dict | None = None) -> dict:
     """
     [Requires authentication]
     Retrieves information about a specific giveaway from the Tonnel Marketplace.
@@ -1179,36 +1197,39 @@ def giveawayInfo(giveaway_id: str, authData: str) -> dict:
         Exception: If the API request fails.
     """
     if not authData:
-        raise ValueError("authData is required.")
+        raise ValueError("tonnelmp: giveawayInfo(): authData is required.")
     if not giveaway_id:
-        raise ValueError("giveaway_id is required.")
+        raise ValueError("tonnelmp: giveawayInfo(): giveaway_id is required.")
 
-    url = "https://gifts2.tonnel.network/api/giveaway/info"
+    URL = "https://gifts2.tonnel.network/api/giveaway/info"
 
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "Host": "gifts2.tonnel.network"
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts2.tonnel.network"
+    HEADERS["user-agent"] = user_agent
 
     payload = {
         "giveAwayId": giveaway_id,
         "authData": authData
     }
-
-    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
-
-    if response.status_code != 200:
-        raise Exception(f"getGiveawayInfo failed {response.status_code}: {response.text}")
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: giveawayInfo(): Request failed: {e}")
+    
+    if response.status_code in [403, 429]:
+        raise Exception(f"tonnelmp: giveawayInfo(): Request failed with status code {response.status_code} (Likely CloudFlare)")
+    elif response.status_code != 200:
+        raise Exception(f"tonnelmp: giveawayInfo(): getGiveawayInfo failed {response.status_code}: {response.text}")
 
     return response.json()
 
 def joinGiveaway(
     giveaway_id: str,
     authData: str,
-    ticketCount: int | None = None
+    ticketCount: int | None = None,
+    proxies: dict | None = None
 ) -> dict:
     """
     Joins a giveaway on the Tonnel Marketplace.
@@ -1222,7 +1243,7 @@ def joinGiveaway(
         dict: API response.
     """
     if not authData:
-        raise ValueError("authData is required")
+        raise ValueError("tonnelmp: joinGiveaway(): authData is required")
 
     timestamp, wtf = generate_wtf()
 
@@ -1236,23 +1257,25 @@ def joinGiveaway(
     if ticketCount is not None:
         payload["ticketCount"] = ticketCount
 
-    url = "https://gifts.coffin.meme/api/giveaway/join"
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "Host": "gifts.coffin.meme"
-    }
+    URL = "https://gifts.coffin.meme/api/giveaway/join"
 
-    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts.coffin.meme"
+    HEADERS["user-agent"] = user_agent
+
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: joinGiveaway(): Request failed: {e}")
 
     if response.status_code != 200:
-        raise Exception(f"joinGiveaway failed {response.status_code}: {response.text}")
+        raise Exception(f"tonnelmp: joinGiveaway(): Request failed {response.status_code}: {response.text}")
 
     return response.json()
 
-def filterStats(authData: str) -> dict:
+def filterStats(authData: str, proxies: dict = None) -> dict:
     """
     Retrieves filter stats from tonnel mp.
 
@@ -1267,33 +1290,33 @@ def filterStats(authData: str) -> dict:
         Exception: If the API request fails.
     """
     if not authData:
-        raise ValueError("authData is required")
+        raise ValueError("tonnelmp: filterStats(): authData is required")
 
-    url = "https://gifts2.tonnel.network/api/filterStats"
+    URL = "https://gifts2.tonnel.network/api/filterStats"
 
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Host": "gifts2.tonnel.network"
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts2.tonnel.network"
+    HEADERS["user-agent"] = user_agent
 
     payload = {
         "authData": authData
     }
 
-    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: filterStats(): Request failed: {e}")
 
     if response.status_code != 200:
-        raise Exception(f"filterStats failed {response.status_code}: {response.text}")
+        raise Exception(f"tonnelmp: filterStats(): Request failed {response.status_code}: {response.text}")
 
     return response.json()
 
 import re
 
-def filterStatsPretty(authData: str) -> dict:
+def filterStatsPretty(authData: str, proxies: dict = None) -> dict:
     """
     Prettier version of filterStats with lowercase keys + summary renamed to 'data'.
     Output format:
@@ -1313,30 +1336,31 @@ def filterStatsPretty(authData: str) -> dict:
     """
 
     if not authData:
-        raise ValueError("authData is required")
+        raise ValueError("tonnelmp: filterStatsPretty(): authData is required")
 
-    url = "https://gifts3.tonnel.network/api/filterStats"
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-        "Host": "gifts3.tonnel.network"
-    }
+    URL = "https://gifts3.tonnel.network/api/filterStats"
+    
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts3.tonnel.network"
+    HEADERS["user-agent"] = user_agent
 
     payload = {
         "authData": authData
     }
-
-    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: filterStatsPretty(): Request failed: {e}")
 
     if response.status_code != 200:
-        raise Exception(f"filterStatsPretty failed {response.status_code}: {response.text}")
+        raise Exception(f"tonnelmp: filterStatsPretty(): Request failed {response.status_code}: {response.text}")
 
     r = response.json()
+
     if r.get("status") != "success":
-        raise Exception("api error: " + r.get("message", "unknown error"))
+        raise Exception("tonnelmp: filterStatsPretty(): api error: " + r.get("message", "unknown error"))
 
     rawdata = r.get("data", {})
     data = {}
@@ -1389,7 +1413,8 @@ def filterStatsPretty(authData: str) -> dict:
 
 def giftData(
         gift_id: int | str,
-        authData: str
+        authData: str,
+        proxies: dict | None = None
         ) -> dict:
     """
     [Requires authentication]
@@ -1408,29 +1433,26 @@ def giftData(
     """
 
     if not authData:
-        raise ValueError("authData is required")
+        raise ValueError("tonnelmp: giftData(): authData is required")
 
-    url = f"https://gifts2.tonnel.network/api/giftData/{gift_id}"
+    URL = f"https://gifts2.tonnel.network/api/giftData/{gift_id}"
 
-    headers = {
-        "Origin": "https://market.tonnel.network",
-        "Referer": "https://market.tonnel.network/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36",
-        "Host": "gifts2.tonnel.network",
-        "Accept": "application/json, text/plain, */*",
-        "Content-Type": "application/json",
-    }
+    ua = UserAgent()
+    user_agent = ua.random
+
+    HEADERS["authority"] = "gifts2.tonnel.network"
+    HEADERS["user-agent"] = user_agent
 
     payload = {
         "authData": authData,
         "ref": ""
     }
+    try:
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+    except Exception as e:
+        raise Exception(f"tonnelmp: giftData(): Request failed: {e}")
 
-    response = requests.post(url, headers=headers, json=payload, impersonate="chrome110")
-
-    if response.status_code == 429:
-        raise Exception(f"Request failed with status code {response.status_code} (Likely CloudFlare)")
+    if response.status_code in [403, 429]:
+        raise Exception(f"tonnelmp: giftData(): Request failed with status code {response.status_code} (Likely CloudFlare)")
     elif response.status_code != 200:
-        raise Exception(f"Request failed with status code {response.status_code}")
-
-    return response.json()
+        raise Exception(f"tonnelmp: giftData(): Request failed with status code {response.status_code}")

@@ -113,6 +113,12 @@ Then navigate to Application tab -> Storage -> Local Storage -> https://market.t
 
 - Fixed `gift_name` not adding to filters in `saleHistory()` and `getAuctions()`
 
+#### Version 1.2
+
+- **Another 403 fix.** 403 error should now appear less often. *Thanks to boostNT*
+- Added proxies support to all the functions
+- `fake_useragent` is now in dependencies. `pip install fake_useragent==2.2.0`
+
 ## Some returns examples:
 
 #### Gift example:
@@ -200,6 +206,17 @@ print(info(authData="your_auth_data"))
 	'name': ' ... ' # your telegram name
 }
 ```
+
+#### Proxies example
+
+```python
+from tonnelmp import filterStatsPretty
+auth="auth"
+proxies= {"https": "http://username:password@ip:port"}
+print(filterStatsPretty(authData=auth, proxies=proxies))
+```
+
+You can use multiple proxies as well, just add them to the dict.
 
 # Documentation
 

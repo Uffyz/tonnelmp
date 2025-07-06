@@ -1,4 +1,5 @@
-[![pypi](https://img.shields.io/pypi/v/tonnelmp.svg)](https://pypi.org/project/tonnelmp/) [![stars](https://img.shields.io/github/stars/bleach-hub/tonnelmp?style=social)](https://github.com/bleach-hub/tonnelmp/stargazers) [![Me](https://img.shields.io/badge/Telegram-@perfectlystill-blue?logo=telegram)](https://t.me/perfectlystill) [![Updates & Devs chat](https://img.shields.io/badge/Telegram-@giftsdevs-blue?logo=telegram)](https://t.me/giftsdevs)
+[![pypi](https://img.shields.io/pypi/v/tonnelmp.svg)](https://pypi.org/project/tonnelmp/) ![PyPI - Downloads](https://img.shields.io/pypi/dm/tonnelmp)
+ [![stars](https://img.shields.io/github/stars/bleach-hub/tonnelmp?style=social)](https://github.com/bleach-hub/tonnelmp/stargazers) [![Me](https://img.shields.io/badge/Telegram-@perfectlystill-blue?logo=telegram)](https://t.me/perfectlystill) [![Updates & Devs chat](https://img.shields.io/badge/Telegram-@giftsdevs-blue?logo=telegram)](https://t.me/giftsdevs)
 
 # ***Tonnel Marketplace API***
 

@@ -3,7 +3,12 @@ import urllib.parse
 from curl_cffi import requests
 from tonnelmp.wtf import generate_wtf
 from datetime import datetime, timezone, timedelta
-from fake_useragent import UserAgent
+# from fake_useragent import UserAgent
+
+class UserAgent: # <-- Поменял тут
+    @property
+    def random(self):
+        return "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36"
 
 HEADERS = {
     "authority": "",
@@ -1350,7 +1355,7 @@ def filterStatsPretty(authData: str, proxies: dict = None) -> dict:
         "authData": authData
     }
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: filterStatsPretty(): Request failed: {e}")
 

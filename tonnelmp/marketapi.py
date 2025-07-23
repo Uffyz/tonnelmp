@@ -177,7 +177,7 @@ def getGifts(
         payload["price_range"] = 0
 
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: getGifts(): Request failed with error: {e}")
 
@@ -261,7 +261,7 @@ def myGifts(
         "user_auth": authData
     }
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: myGifts(): Request failed with error: {e}")
 
@@ -317,7 +317,7 @@ def listForSale(
         "wtf": wtf
     }
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: listForSale(): Request failed with error: {e}")
 
@@ -369,7 +369,7 @@ def cancelSale(
         "wtf": wtf
     }
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: cancelSale(): Request failed with error: {e}")
 
@@ -464,7 +464,7 @@ def saleHistory(
         "sort": json.loads(sort_value)
     }
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: saleHistory(): Request failed with exception {e}")
 
@@ -580,7 +580,7 @@ def getAuctions(
     else:
         payload["price_range"] = 0
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: getAuctions(): Request failed with error: {e}")
 
@@ -650,7 +650,7 @@ def createAuction(
     HEADERS["user-agent"] = user_agent
 
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: createAuction(): Request failed with error: {e}")
 
@@ -698,7 +698,7 @@ def cancelAuction(
     }
 
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: cancelAuction(): Request failed with error: {e}")
 
@@ -766,7 +766,7 @@ def buyGift(
             "showPrice": showPrice
         })
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: buyGift(): Request failed with error: {e}")
 
@@ -812,7 +812,7 @@ def info(
     }
 
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: info(): Request failed with error: {e}")
 
@@ -944,7 +944,7 @@ def withdraw(
         "asset": asset
     }
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=15, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=15, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: withdraw(): Request failed with error: {e}")
 
@@ -988,7 +988,7 @@ def returnGift(gift_id: int, authData: str, proxies: dict | None = None) -> dict
     }
 
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: returnGift(): Request failed with error: {e}")
 
@@ -1035,7 +1035,7 @@ def placeBid(auction_id: str, amount: int | float, authData: str, asset: str = "
         "asset": asset
     }
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: placeBid(): Request failed with error: {e}")
 
@@ -1078,7 +1078,7 @@ def switchTransfer(authData: str, transferGift: bool, proxies: dict | None = Non
         "authData": authData
     }
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: switchTransfer(): Request failed with error: {e}")
 
@@ -1128,7 +1128,7 @@ def mintGift(authData: str, wallet: str, gift_id: int, proxies: dict | None = No
     }
 
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=15, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=15, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: mintGift(): Request failed with error: {e}")
     
@@ -1174,7 +1174,7 @@ def unlockListing(authData: str, gift_id: int, proxies: dict | None = None) -> d
     }
 
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: unlockListing(): Request failed: {e}")
     
@@ -1219,7 +1219,7 @@ def giveawayInfo(giveaway_id: str, authData: str, proxies: dict | None = None) -
         "authData": authData
     }
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: giveawayInfo(): Request failed: {e}")
     
@@ -1271,7 +1271,7 @@ def joinGiveaway(
     HEADERS["user-agent"] = user_agent
 
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: joinGiveaway(): Request failed: {e}")
 
@@ -1310,7 +1310,7 @@ def filterStats(authData: str, proxies: dict = None) -> dict:
     }
 
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: filterStats(): Request failed: {e}")
 
@@ -1453,7 +1453,7 @@ def giftData(
         "ref": ""
     }
     try:
-        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome110", timeout=10, proxies=proxies)
+        response = requests.post(URL, headers=HEADERS, json=payload, impersonate="chrome", timeout=10, proxies=proxies)
     except Exception as e:
         raise Exception(f"tonnelmp: giftData(): Request failed: {e}")
 

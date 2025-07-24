@@ -1386,7 +1386,7 @@ def filterStatsPretty(authData: str, proxies: dict = None) -> dict:
             rarity = None
 
         gift_key = gift_name.strip().lower()
-        model_key = model_name.strip()
+        model_key = model_name.strip().lower()
 
         floor = value.get("floorPrice")
         how_many = value.get("howMany", 0)

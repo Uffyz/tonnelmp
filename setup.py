@@ -6,7 +6,7 @@ long_description = (cwd / "README.md").read_text()
 
 setup(
     name="tonnelmp",
-    version="1.0.22",
+    version="1.0.23",
     author="bleach",
     author_email="year0001@internet.ru",
     description="A Python Module for interacting with Tonnel Marketplace API",
